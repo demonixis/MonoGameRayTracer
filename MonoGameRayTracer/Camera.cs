@@ -17,7 +17,7 @@ namespace MonoGameRayTracer
             m_Origin = new Vector3(0.0f, 0.0f, 0.0f);
         }
 
-        public Ray GetRay(float u, float v) => new Ray(m_Origin, m_LowerLeftCorner + u * m_Horizontal + v * m_Vertical - m_Origin);
+        public Ray GetRay(ref float u, ref float v) => new Ray(m_Origin, m_LowerLeftCorner + u * m_Horizontal + v * m_Vertical - m_Origin);
 
         public void Move(float x, float y, float z)
         {
