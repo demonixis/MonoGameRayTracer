@@ -51,7 +51,9 @@ namespace MonoGameRayTracer
             m_RenderWidth = (int)(screenWidth * multiplier);
             m_RenderHeight = (int)(screenHeight * multiplier);
 
-            m_SpriteBatch = new SpriteBatch(GraphicsDevice);
+            if (m_FrontBuffer != null)
+                m_FrontBuffer.Dispose();
+
             m_FrontBuffer = new Texture2D(GraphicsDevice, m_RenderWidth, m_RenderHeight, false, SurfaceFormat.Color);
             m_BackBuffer = new Color[m_RenderWidth * m_RenderHeight];
 
@@ -60,14 +62,15 @@ namespace MonoGameRayTracer
 
         protected override void LoadContent()
         {
+            m_SpriteBatch = new SpriteBatch(GraphicsDevice);
             m_SpriteFont = Content.Load<SpriteFont>("Default");
             m_Stopwatch = new Stopwatch();
 
-            SetRenderSize(640, 480, 0.25f);
+            SetRenderSize(720, 480, 1.0f);
 
             var spheres = new Hitable[]
             {
-                new Sphere(new Vector3(0.0f, 0.0f, -1.0f), 0.5f, new LambertMaterial(0.8f, 0.3f, 0.3f)),
+                new Sphere(new Vector3(0.0f, 0.0f, -2.0f), 0.5f, new LambertMaterial(0.6f, 0.2f, 0.3f)),
                 new Sphere(new Vector3(-1.0f, -0.25f, -0.5f), 0.15f, new MetalMaterial(0.2f, 0.8f, 0.3f, 0.7f)),
                 new Sphere(new Vector3(1.5f, 0.0f, -1.5f), 0.5f, new LambertMaterial(0.8f, 0.8f, 0.0f)),
                 new Sphere(new Vector3(-2.0f, 0.0f, -2.0f), 0.5f, new MetalMaterial(0.8f, 0.6f, 0.2f, 0.3f)),
