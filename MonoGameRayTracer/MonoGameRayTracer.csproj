@@ -49,6 +49,8 @@
     <Compile Include="LambertMaterial.cs" />
     <Compile Include="Material.cs" />
     <Compile Include="MetalMaterial.cs" />
+    <Compile Include="Utils\Input.cs" />
+    <Compile Include="Utils\Random.cs" />
     <Compile Include="RayTracerGame.cs" />
     <Compile Include="Hitable.cs" />
     <Compile Include="HitableList.cs" />

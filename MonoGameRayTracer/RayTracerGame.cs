@@ -1,16 +1,15 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MonoGameRayTracer.Utils;
 using System;
 using System.Diagnostics;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace MonoGameRayTracer
 {
     public class RayTracerGame : Game
     {
-        private static Random m_Random = new Random(DateTime.Now.Millisecond);
         private GraphicsDeviceManager m_GraphicsDeviceManager;
         private SpriteBatch m_SpriteBatch;
         private Texture2D m_FrontBuffer;
@@ -30,12 +29,15 @@ namespace MonoGameRayTracer
         private int m_ThreadSleepTime = 10;
         private bool m_UseThread = true;
         private bool m_Realtime = true;
+        private Input m_Input;
+        private float m_LastFrameTime = 0.0f;
 
         public RayTracerGame()
         {
             m_GraphicsDeviceManager = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             Window.Title = "MonoGame Raytracer";
+            m_Input = new Input(this);
         }
 
         private void SetRenderSize(int screenWidth, int screenHeight, float multiplier)
@@ -64,7 +66,7 @@ namespace MonoGameRayTracer
             m_SpriteFont = Content.Load<SpriteFont>("Default");
             m_Stopwatch = new Stopwatch();
 
-            SetRenderSize(720, 480, 0.5f);
+            SetRenderSize(1280, 720, 1.0f);
 
             var spheres = new Hitable[]
             {
@@ -86,25 +88,30 @@ namespace MonoGameRayTracer
 
         protected override void Update(GameTime gameTime)
         {
-            var state = Keyboard.GetState();
+            if (m_Input.GetKeyDown(Keys.Escape))
+            {
+                if (m_UseThread && m_Thread != null)
+                    m_Thread.Abort();
 
-            if (state.IsKeyDown(Keys.Escape))
                 Exit();
+            }
 
-            if (state.IsKeyDown(Keys.Up))
-                m_Camera.Move(0, 0, 1);
-            else if (state.IsKeyDown(Keys.Down))
-                m_Camera.Move(0, 0, -1);
+            var step = 0.001f * gameTime.ElapsedGameTime.Milliseconds;
 
-            if (state.IsKeyDown(Keys.Left))
-                m_Camera.Move(-1, 0, 0);
-            else if (state.IsKeyDown(Keys.Right))
-                m_Camera.Move(1, 0, -1);
+            if (m_Input.GetKey(Keys.Up))
+                m_Camera.Move(0, 0, -step);
+            else if (m_Input.GetKey(Keys.Down))
+                m_Camera.Move(0, 0, step);
 
-            if (state.IsKeyDown(Keys.PageUp))
+            if (m_Input.GetKey(Keys.Left))
+                m_Camera.Move(-step, 0, 0);
+            else if (m_Input.GetKey(Keys.Right))
+                m_Camera.Move(step, 0, 0);
+
+            if (m_Input.GetKeyDown(Keys.PageUp))
                 m_NS++;
 
-            if (state.IsKeyDown(Keys.PageDown))
+            if (m_Input.GetKeyDown(Keys.PageDown))
             {
                 m_NS--;
 
@@ -112,7 +119,7 @@ namespace MonoGameRayTracer
                     m_NS = 1;
             }
 
-            if (state.IsKeyDown(Keys.R))
+            if (m_Input.GetKeyDown(Keys.R))
             {
                 if (m_UseThread && m_Thread != null)
                 {
@@ -123,16 +130,16 @@ namespace MonoGameRayTracer
                 m_Realtime = true;
             }
 
-            if (state.IsKeyDown(Keys.T))
+            if (m_Input.GetKeyDown(Keys.T))
             {
                 m_UseThread = true;
                 StartThreadedRenderLoop();
             }
 
-            if (state.IsKeyDown(Keys.Space))
+            if (m_Input.GetKeyDown(Keys.Space))
                 UpdatePixels();
 
-            if (state.IsKeyDown(Keys.I))
+            if (m_Input.GetKeyDown(Keys.I))
                 m_ShowUI = !m_ShowUI;
 
             base.Update(gameTime);
@@ -155,7 +162,7 @@ namespace MonoGameRayTracer
             {
                 m_SpriteBatch.DrawString(m_SpriteFont, $"Realtime: {m_Realtime}", new Vector2(5, 5), Color.DarkGreen);
                 m_SpriteBatch.DrawString(m_SpriteFont, $"Threading: {m_UseThread}", new Vector2(5, 20), Color.DarkGreen);
-                m_SpriteBatch.DrawString(m_SpriteFont, $"Elapsed Time: {m_Stopwatch.ElapsedMilliseconds}ms", new Vector2(5, 35), Color.DarkGreen);
+                m_SpriteBatch.DrawString(m_SpriteFont, $"Elapsed Time: {m_LastFrameTime}ms", new Vector2(5, 35), Color.DarkGreen);
                 m_SpriteBatch.DrawString(m_SpriteFont, $"Step: {m_NS}", new Vector2(5, 50), Color.DarkGreen);
                 m_SpriteBatch.DrawString(m_SpriteFont, $"Screen Width: {m_ScreenWidth}", new Vector2(5, 65), Color.DarkGreen);
                 m_SpriteBatch.DrawString(m_SpriteFont, $"Screen Height: {m_ScreenHeight}", new Vector2(5, 80), Color.DarkGreen);
@@ -221,6 +228,7 @@ namespace MonoGameRayTracer
             m_FrontBuffer.SetData<Color>(m_BackBuffer);
 
             m_Stopwatch.Stop();
+            m_LastFrameTime = m_Stopwatch.ElapsedMilliseconds;
         }
 
         private void UpdatePixel(ref int i, ref int j)
@@ -229,8 +237,8 @@ namespace MonoGameRayTracer
 
             for (var s = 0; s < m_NS; s++)
             {
-                var u = (float)(i + (float)m_Random.NextDouble()) / m_RenderWidth;
-                var v = (float)(j + (float)m_Random.NextDouble()) / m_RenderHeight;
+                var u = (float)(i + Random.Value) / m_RenderWidth;
+                var v = (float)(j + Random.Value) / m_RenderHeight;
                 var ray = m_Camera.GetRay(ref u, ref v);
                 color += GetColor(ref ray, m_World, 0);
             }
@@ -253,7 +261,7 @@ namespace MonoGameRayTracer
 
             do
             {
-                vector = 2.0f * new Vector3((float)m_Random.NextDouble(), (float)m_Random.NextDouble(), (float)m_Random.NextDouble()) - Vector3.One;
+                vector = 2.0f * Random.Vector3 - Vector3.One;
             }
             while (vector.LengthSquared() > 1.0f);
 

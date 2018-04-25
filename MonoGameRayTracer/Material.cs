@@ -5,8 +5,6 @@ namespace MonoGameRayTracer
 {
     public abstract class Material
     {
-        protected static Random m_Random = new Random(DateTime.Now.Millisecond);
-
         public abstract bool Scatter(ref Ray ray, ref HitRecord record, ref Vector3 attenuation, ref Ray scattered);
 
         public static Vector3 RandomInUnitySphere()
@@ -15,7 +13,7 @@ namespace MonoGameRayTracer
 
             do
             {
-                vector = 2.0f * new Vector3((float)m_Random.NextDouble(), (float)m_Random.NextDouble(), (float)m_Random.NextDouble()) - Vector3.One;
+                vector = 2.0f * Random.Vector3 - Vector3.One;
             }
             while (vector.LengthSquared() > 1.0f);
 
