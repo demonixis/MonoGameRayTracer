@@ -8,6 +8,7 @@ namespace MonoGameRayTracer
         private Vector3 m_LowerLeftCorner;
         private Vector3 m_Horizontal;
         private Vector3 m_Vertical;
+        private Vector3 m_Position;
 
         public Camera()
         {
@@ -21,9 +22,9 @@ namespace MonoGameRayTracer
 
         public void Move(float x, float y, float z)
         {
-            m_Origin.X += x;
-            m_Origin.Y += y;
-            m_Origin.Z += z;
+            m_Position.X += x;
+            m_Position.Y += y;
+            m_Position.Z += z;
         }
     }
 }

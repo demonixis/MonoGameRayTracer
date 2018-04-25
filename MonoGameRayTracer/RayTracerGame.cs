@@ -2,7 +2,6 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,9 +28,8 @@ namespace MonoGameRayTracer
         private Stopwatch m_Stopwatch;
         private bool m_ShowUI = true;
         private int m_ThreadSleepTime = 10;
-        private bool m_UseThread = false;
-        private bool m_ParallelFor = false;
-        private bool m_Realtime = false;
+        private bool m_UseThread = true;
+        private bool m_Realtime = true;
 
         public RayTracerGame()
         {
@@ -66,7 +64,7 @@ namespace MonoGameRayTracer
             m_SpriteFont = Content.Load<SpriteFont>("Default");
             m_Stopwatch = new Stopwatch();
 
-            SetRenderSize(720, 480, 1.0f);
+            SetRenderSize(720, 480, 0.5f);
 
             var spheres = new Hitable[]
             {
@@ -114,9 +112,6 @@ namespace MonoGameRayTracer
                     m_NS = 1;
             }
 
-            if (state.IsKeyDown(Keys.P))
-                m_ParallelFor = !m_ParallelFor;
-
             if (state.IsKeyDown(Keys.R))
             {
                 if (m_UseThread && m_Thread != null)
@@ -151,6 +146,9 @@ namespace MonoGameRayTracer
                 UpdatePixels();
 
             m_SpriteBatch.Begin();
+
+            var obj = new Object();
+
             m_SpriteBatch.Draw(m_FrontBuffer, m_FrontbufferRect, null, Color.White, 0, Vector2.Zero, SpriteEffects.FlipVertically, 0);
 
             if (m_ShowUI)
@@ -158,12 +156,10 @@ namespace MonoGameRayTracer
                 m_SpriteBatch.DrawString(m_SpriteFont, $"Realtime: {m_Realtime}", new Vector2(5, 5), Color.DarkGreen);
                 m_SpriteBatch.DrawString(m_SpriteFont, $"Threading: {m_UseThread}", new Vector2(5, 20), Color.DarkGreen);
                 m_SpriteBatch.DrawString(m_SpriteFont, $"Elapsed Time: {m_Stopwatch.ElapsedMilliseconds}ms", new Vector2(5, 35), Color.DarkGreen);
-                m_SpriteBatch.DrawString(m_SpriteFont, $"ParallelFor: {m_ParallelFor}", new Vector2(5, 50), Color.DarkGreen);
-                m_SpriteBatch.DrawString(m_SpriteFont, $"Step: {m_NS}", new Vector2(5, 65), Color.DarkGreen);
-                m_SpriteBatch.DrawString(m_SpriteFont, $"Screen Width: {m_ScreenWidth}", new Vector2(5, 80), Color.DarkGreen);
-                m_SpriteBatch.DrawString(m_SpriteFont, $"Screen Height: {m_ScreenHeight}", new Vector2(5, 95), Color.DarkGreen);
-                m_SpriteBatch.DrawString(m_SpriteFont, $"Render Scale: {(float)m_RenderWidth / (float)m_ScreenWidth}%", new Vector2(5, 110), Color.DarkGreen);
-                m_SpriteBatch.DrawString(m_SpriteFont, $"Working: {(m_Realtime ? "Yes" : m_Stopwatch.IsRunning ? "Yes" : "No")}", new Vector2(5, 125), Color.DarkGreen);
+                m_SpriteBatch.DrawString(m_SpriteFont, $"Step: {m_NS}", new Vector2(5, 50), Color.DarkGreen);
+                m_SpriteBatch.DrawString(m_SpriteFont, $"Screen Width: {m_ScreenWidth}", new Vector2(5, 65), Color.DarkGreen);
+                m_SpriteBatch.DrawString(m_SpriteFont, $"Screen Height: {m_ScreenHeight}", new Vector2(5, 80), Color.DarkGreen);
+                m_SpriteBatch.DrawString(m_SpriteFont, $"Render Scale: {(float)m_RenderWidth / (float)m_ScreenWidth * 100.0f}%", new Vector2(5, 95), Color.DarkGreen);
             }
 
             m_SpriteBatch.End();
@@ -220,36 +216,23 @@ namespace MonoGameRayTracer
 
             for (var j = m_RenderHeight - 1; j >= 0; j--)
                 for (var i = 0; i < m_RenderWidth; i++)
-                    UpdatePixel(i, j);
+                    UpdatePixel(ref i, ref j);
 
             m_FrontBuffer.SetData<Color>(m_BackBuffer);
 
             m_Stopwatch.Stop();
         }
 
-        private void UpdatePixel(int i, int j)
+        private void UpdatePixel(ref int i, ref int j)
         {
             var color = Vector3.Zero;
 
-            if (m_ParallelFor)
+            for (var s = 0; s < m_NS; s++)
             {
-                Parallel.For(0, m_NS, index =>
-                {
-                    var u = (float)(i + (float)m_Random.NextDouble()) / m_RenderWidth;
-                    var v = (float)(j + (float)m_Random.NextDouble()) / m_RenderHeight;
-                    var ray = m_Camera.GetRay(ref u, ref v);
-                    color += GetColor(ref ray, m_World, 0);
-                });
-            }
-            else
-            {
-                for (var s = 0; s < m_NS; s++)
-                {
-                    var u = (float)(i + (float)m_Random.NextDouble()) / m_RenderWidth;
-                    var v = (float)(j + (float)m_Random.NextDouble()) / m_RenderHeight;
-                    var ray = m_Camera.GetRay(ref u, ref v);
-                    color += GetColor(ref ray, m_World, 0);
-                }
+                var u = (float)(i + (float)m_Random.NextDouble()) / m_RenderWidth;
+                var v = (float)(j + (float)m_Random.NextDouble()) / m_RenderHeight;
+                var ray = m_Camera.GetRay(ref u, ref v);
+                color += GetColor(ref ray, m_World, 0);
             }
 
             color /= (float)m_NS;
@@ -277,6 +260,7 @@ namespace MonoGameRayTracer
             return vector;
         }
 
+        Vector3 UnitVector(ref Vector3 vector) => vector / vector.Length();
         Vector3 UnitVector(Vector3 vector) => vector / vector.Length();
 
         public void MakeUnitVector(ref Vector3 vector)
