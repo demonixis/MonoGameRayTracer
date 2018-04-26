@@ -42,15 +42,7 @@ namespace MonoGameRayTracer
 
             m_RayTracer = new RayTracer(GraphicsDevice, 0.75f);
 
-            var spheres = new Hitable[]
-            {
-                new Sphere(new Vector3(0.0f, 0.0f, -2.0f), 0.5f, new LambertMaterial(0.6f, 0.2f, 0.3f)),
-                new Sphere(new Vector3(-1.0f, -0.25f, -0.5f), 0.15f, new MetalMaterial(0.2f, 0.8f, 0.3f, 0.7f)),
-                new Sphere(new Vector3(1.5f, 0.0f, -1.5f), 0.5f, new DieletricMaterial(2.5f)),
-                new Sphere(new Vector3(-2.0f, 0.0f, -2.0f), 0.5f, new MetalMaterial(0.8f, 0.6f, 0.2f, 0.3f)),
-                new Sphere(new Vector3(0.0f, -100.5f, -1.0f), 100, new MetalMaterial(0.8f, 0.8f, 0.8f, 0.1f))
-            };
-
+            // Prepare the scene.
             var list = new List<Hitable>();
             list.Add(new Sphere(new Vector3(0, -1000, 0), 1000, new LambertMaterial(0.5f, 0.5f, 0.5f)));
 
@@ -80,6 +72,7 @@ namespace MonoGameRayTracer
             list.Add(new Sphere(new Vector3(-4, 1, 0), 1, new LambertMaterial(0.4f, 0.2f, 0.1f)));
             list.Add(new Sphere(new Vector3(4, 1, 0), 1, new MetalMaterial(0.7f, 0.6f, 0.5f, 0.0f)));
 
+            // Final setup.
             var aspect = (float)m_GraphicsDeviceManager.PreferredBackBufferWidth / (float)m_GraphicsDeviceManager.PreferredBackBufferHeight;
 
             m_Camera = new Camera(new Vector3(0, 0.5f, 4.5f), new Vector3(-0.22f, 0.15f, 0.0f), Vector3.Up, 75.0f, aspect);
