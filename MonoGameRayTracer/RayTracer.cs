@@ -22,6 +22,8 @@ namespace MonoGameRayTracer
         private float m_Scale = 1.0f;
         private bool m_ThreadRunning = false;
 
+        private Thread[] m_PixelThreads;
+
         public int MaxDepth
         {
             get => m_MaxDepth;
@@ -98,7 +100,7 @@ namespace MonoGameRayTracer
                 throw new Exception("The Thread is still running");
 
             m_ThreadRunning = true;
-            
+
             m_Thread = new Thread(() =>
             {
                 while (m_ThreadRunning)
@@ -118,6 +120,32 @@ namespace MonoGameRayTracer
                 m_ThreadRunning = false;
                 m_Thread.Abort();
             }
+        }
+
+        public void RenderMultithread(Camera camera, Hitable world)
+        {
+            var threadCount = 4;
+            var threadCountPerTwo = threadCount / 2;
+            var chunckX = m_RenderWidth / threadCountPerTwo;
+            var chunckY = m_RenderHeight / threadCountPerTwo;
+
+            if (m_PixelThreads == null)
+            {
+                m_PixelThreads = new Thread[threadCount];
+
+                for (var x = 0; x < threadCount; x++)
+                {
+                    m_PixelThreads[x] = new Thread(() =>
+                    {
+                        /*for (var j = m_RenderHeight - 1; j >= 0; j--)
+                            for (var i = 0; i < m_RenderWidth; i++)
+                                UpdatePixel(ref i, ref j, camera, world);*/
+                    });
+                }
+            }
+
+            for (var i = 0; i < threadCount; i++)
+                m_PixelThreads[i].Start();
         }
 
         public void Render(Camera camera, Hitable world)
