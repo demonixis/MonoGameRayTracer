@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 
-namespace MonoGameRayTracer
+namespace MonoGameRayTracer.Materials
 {
     public class MetalMaterial : Material
     {

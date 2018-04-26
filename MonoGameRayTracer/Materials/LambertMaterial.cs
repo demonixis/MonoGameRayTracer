@@ -1,12 +1,17 @@
 ﻿using Microsoft.Xna.Framework;
 
-namespace MonoGameRayTracer
+namespace MonoGameRayTracer.Materials
 {
     public class LambertMaterial : Material
     {
         private Vector3 m_Albedo;
 
         public Vector3 Albedo => m_Albedo;
+
+        public LambertMaterial(Vector3 albedo)
+        {
+            m_Albedo = albedo;
+        }
 
         public LambertMaterial(float x, float y, float z)
         {

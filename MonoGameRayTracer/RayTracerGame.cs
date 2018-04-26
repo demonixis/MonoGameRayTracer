@@ -1,8 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MonoGameRayTracer.Materials;
 using MonoGameRayTracer.Utils;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 
@@ -31,6 +33,7 @@ namespace MonoGameRayTracer
         private bool m_Realtime = true;
         private Input m_Input;
         private float m_LastFrameTime = 0.0f;
+        private int m_MaxDepth = 50;
 
         public RayTracerGame()
         {
@@ -66,16 +69,43 @@ namespace MonoGameRayTracer
             m_SpriteFont = Content.Load<SpriteFont>("Default");
             m_Stopwatch = new Stopwatch();
 
-            SetRenderSize(1280, 720, 1.0f);
+            SetRenderSize(320, 240, 0.85f);
 
             var spheres = new Hitable[]
             {
                 new Sphere(new Vector3(0.0f, 0.0f, -2.0f), 0.5f, new LambertMaterial(0.6f, 0.2f, 0.3f)),
                 new Sphere(new Vector3(-1.0f, -0.25f, -0.5f), 0.15f, new MetalMaterial(0.2f, 0.8f, 0.3f, 0.7f)),
-                new Sphere(new Vector3(1.5f, 0.0f, -1.5f), 0.5f, new LambertMaterial(0.8f, 0.8f, 0.0f)),
+                new Sphere(new Vector3(1.5f, 0.0f, -1.5f), 0.5f, new DieletricMaterial(2.5f)),
                 new Sphere(new Vector3(-2.0f, 0.0f, -2.0f), 0.5f, new MetalMaterial(0.8f, 0.6f, 0.2f, 0.3f)),
                 new Sphere(new Vector3(0.0f, -100.5f, -1.0f), 100, new MetalMaterial(0.8f, 0.8f, 0.8f, 0.1f))
             };
+
+            var list = new List<Hitable>();
+            list.Add(new Sphere(new Vector3(0, -1000, 0), 1000, new LambertMaterial(0.5f, 0.5f, 0.5f)));
+
+            var temp = new Vector3(4, 0.2f, 0);
+            for (var a = -11; a < 11; a++)
+            {
+                for (var b = -11; b < 11; b++)
+                {
+                    var chooseMat = Random.Value;
+                    var center = new Vector3(a + 0.9f + Random.Value, 0.2f, b + 0.9f + Random.Value);
+
+                    if ((center - temp).Length() > 0.9f)
+                    {
+                        if (chooseMat < 0.8f)
+                            list.Add(new Sphere(center, 0.2f, new LambertMaterial(Random.Vector3Twice)));
+                        else if (chooseMat < 0.95f)
+                            list.Add(new Sphere(center, 0.2f, new MetalMaterial(0.5f * (1 + Random.Value), 0.5f * (1 + Random.Value), 0.5f * (1 + Random.Value), 0.5f * Random.Value)));
+                        else
+                            list.Add(new Sphere(center, 0.2f, new DieletricMaterial(1.5f)));
+                    }
+                }
+            }
+
+            list.Add(new Sphere(new Vector3(0, 1, 0), 1, new DieletricMaterial(1.5f)));
+            list.Add(new Sphere(new Vector3(-4, 1, 0), 1, new LambertMaterial(0.4f, 0.2f, 0.1f)));
+            list.Add(new Sphere(new Vector3(4, 1, 0), 1, new MetalMaterial(0.7f, 0.6f, 0.5f, 0.0f)));
 
             m_Camera = new Camera();
             m_World = new HitableList(spheres);
@@ -142,6 +172,16 @@ namespace MonoGameRayTracer
             if (m_Input.GetKeyDown(Keys.I))
                 m_ShowUI = !m_ShowUI;
 
+            if (m_Input.GetKeyDown(Keys.Insert))
+                m_MaxDepth++;
+           
+            if (m_Input.GetKeyDown(Keys.Delete))
+            {
+                m_MaxDepth--;
+                if (m_MaxDepth < 1)
+                    m_MaxDepth = 1;
+            }
+
             base.Update(gameTime);
         }
 
@@ -167,6 +207,7 @@ namespace MonoGameRayTracer
                 m_SpriteBatch.DrawString(m_SpriteFont, $"Screen Width: {m_ScreenWidth}", new Vector2(5, 65), Color.DarkGreen);
                 m_SpriteBatch.DrawString(m_SpriteFont, $"Screen Height: {m_ScreenHeight}", new Vector2(5, 80), Color.DarkGreen);
                 m_SpriteBatch.DrawString(m_SpriteFont, $"Render Scale: {(float)m_RenderWidth / (float)m_ScreenWidth * 100.0f}%", new Vector2(5, 95), Color.DarkGreen);
+                m_SpriteBatch.DrawString(m_SpriteFont, $"Depth: {m_MaxDepth}", new Vector2(5, 110), Color.DarkGreen);
             }
 
             m_SpriteBatch.End();
@@ -188,7 +229,7 @@ namespace MonoGameRayTracer
 
                 if (record.Material != null)
                 {
-                    if (depth < 50 && record.Material.Scatter(ref ray, ref record, ref attenuation, ref scattered))
+                    if (depth < m_MaxDepth && record.Material.Scatter(ref ray, ref record, ref attenuation, ref scattered))
                         return attenuation * GetColor(ref scattered, world, depth + 1);
                     else
                         return Vector3.Zero;

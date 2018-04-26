@@ -46,9 +46,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Camera.cs" />
-    <Compile Include="LambertMaterial.cs" />
-    <Compile Include="Material.cs" />
-    <Compile Include="MetalMaterial.cs" />
+    <Compile Include="Materials\DieletricMaterial.cs" />
+    <Compile Include="Materials\LambertMaterial.cs" />
+    <Compile Include="Materials\Material.cs" />
+    <Compile Include="Materials\MetalMaterial.cs" />
     <Compile Include="Utils\Input.cs" />
     <Compile Include="Utils\Random.cs" />
     <Compile Include="RayTracerGame.cs" />
@@ -58,7 +59,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Ray.cs" />
     <Compile Include="Sphere.cs" />
-    <Compile Include="Vector.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework">

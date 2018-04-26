@@ -1,4 +1,6 @@
-﻿namespace MonoGameRayTracer
+﻿using MonoGameRayTracer.Materials;
+
+namespace MonoGameRayTracer
 {
     public abstract class Hitable
     {

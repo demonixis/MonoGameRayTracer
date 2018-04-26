@@ -13,6 +13,7 @@ namespace MonoGameRayTracer
 
         public static float Value => (float)s_Random.NextDouble();
         public static Vector3 Vector3 => new Vector3(Value, Value, Value);
+        public static Vector3 Vector3Twice => new Vector3(Value * Value, Value * Value, Value * Value);
         public static Color Color => new Color(Value, Value, Value);
     }
 }
