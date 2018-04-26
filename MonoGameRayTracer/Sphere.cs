@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using MonoGameRayTracer.Materials;
+using MonoGameRayTracer.Utils;
 using System;
 
 namespace MonoGameRayTracer
@@ -36,7 +37,7 @@ namespace MonoGameRayTracer
 
             if (disciminent > 0)
             {
-                var temp = (-b - (float)Math.Sqrt(b * b - a * c)) / a;
+                var temp = (-b - Mathf.Sqrt(b * b - a * c)) / a;
 
                 if (temp < max && temp > min)
                 {
@@ -47,7 +48,7 @@ namespace MonoGameRayTracer
                     return true;
                 }
 
-                temp = (-b + (float)Math.Sqrt(b * b - a * c)) / a;
+                temp = (-b + Mathf.Sqrt(b * b - a * c)) / a;
 
                 if (temp < max && temp > min)
                 {

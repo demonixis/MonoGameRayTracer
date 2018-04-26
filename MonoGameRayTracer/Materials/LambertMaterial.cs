@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using MonoGameRayTracer.Utils;
 
 namespace MonoGameRayTracer.Materials
 {
@@ -20,7 +21,7 @@ namespace MonoGameRayTracer.Materials
 
         public override bool Scatter(ref Ray ray, ref HitRecord record, ref Vector3 attenuation, ref Ray scattered)
         {
-            var target = record.P + record.Normal + RandomInUnitySphere();
+            var target = record.P + record.Normal + Mathf.RandomInUnitySphere();
             scattered = new Ray(record.P, target - record.P);
             attenuation = m_Albedo;
             return true;

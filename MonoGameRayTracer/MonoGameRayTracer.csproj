@@ -50,7 +50,9 @@
     <Compile Include="Materials\LambertMaterial.cs" />
     <Compile Include="Materials\Material.cs" />
     <Compile Include="Materials\MetalMaterial.cs" />
+    <Compile Include="RayTracer.cs" />
     <Compile Include="Utils\Input.cs" />
+    <Compile Include="Utils\Mathf.cs" />
     <Compile Include="Utils\Random.cs" />
     <Compile Include="RayTracerGame.cs" />
     <Compile Include="Hitable.cs" />

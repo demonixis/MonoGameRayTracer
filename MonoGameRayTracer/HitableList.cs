@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 
 namespace MonoGameRayTracer
 {
@@ -7,6 +8,11 @@ namespace MonoGameRayTracer
         private List<Hitable> m_List;
 
         public HitableList(Hitable[] list)
+        {
+            m_List = new List<Hitable>(list);
+        }
+
+        public HitableList(List<Hitable> list)
         {
             m_List = new List<Hitable>(list);
         }

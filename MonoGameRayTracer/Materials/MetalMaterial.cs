@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
+using MonoGameRayTracer.Utils;
 
 namespace MonoGameRayTracer.Materials
 {
@@ -27,8 +28,8 @@ namespace MonoGameRayTracer.Materials
 
         public override bool Scatter(ref Ray ray, ref HitRecord record, ref Vector3 attenuation, ref Ray scattered)
         {
-            var reflected = Vector3.Reflect(UnitVector(ray.Direction), record.Normal);
-            scattered = new Ray(record.P, reflected + m_Fuzz * RandomInUnitySphere());
+            var reflected = Vector3.Reflect(Mathf.UnitVector(ray.Direction), record.Normal);
+            scattered = new Ray(record.P, reflected + m_Fuzz * Mathf.RandomInUnitySphere());
             attenuation = m_Albedo;
             return Vector3.Dot(scattered.Direction, record.Normal) > 0;
         }

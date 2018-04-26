@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
+using MonoGameRayTracer.Utils;
 
 namespace MonoGameRayTracer.Materials
 {
@@ -41,9 +42,9 @@ namespace MonoGameRayTracer.Materials
             }
 
             var direction = ray.Direction;
-            if (Refract(ref direction, ref outwardNormal, niOverNt, ref refracted))
+            if (Mathf.Refract(ref direction, ref outwardNormal, niOverNt, ref refracted))
             {
-                reflectProbe = Schlick(cosine, m_RefIdx);
+                reflectProbe = Mathf.Schlick(cosine, m_RefIdx);
             }
             else
             {
