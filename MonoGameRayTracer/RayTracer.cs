@@ -72,32 +72,22 @@ namespace MonoGameRayTracer
 
         public Texture2D Texture => m_backBufferTexture;
 
-        public RayTracer(GraphicsDevice device, float multiplier)
+        public RayTracer(GraphicsDevice device, float scale)
         {
-            var screenWidth = device.PresentationParameters.BackBufferWidth;
-            var screenHeight = device.PresentationParameters.BackBufferHeight;
-
-            m_RenderWidth = (int)(screenWidth * multiplier);
-            m_RenderHeight = (int)(screenHeight * multiplier);
-
-            m_backBufferTexture = new Texture2D(device, m_RenderWidth, m_RenderHeight, false, SurfaceFormat.Color);
-            m_BackBuffer = new Color[m_RenderWidth * m_RenderHeight];
-
-            m_Scale = multiplier;
             m_Stopwatch = new Stopwatch();
             m_Threads = new List<Thread>();
-
             m_subRects = new SubRect[m_nbSlicePixels * m_nbSlicePixels];
+            m_nbSlicePixels = (int)Math.Sqrt(Environment.ProcessorCount);
 
-            for (var y = 0; y < m_nbSlicePixels; y++)
-                for (var x = 0; x < m_nbSlicePixels; x++)
-                    m_subRects[x + y * m_nbSlicePixels] = new SubRect(x, y, m_RenderWidth, m_RenderHeight, m_nbSlicePixels);
+            SetupBuffers(device, scale);
         }
 
         public bool SetupBuffers(GraphicsDevice device, float scale)
         {
             if (scale < 0.1f)
                 return false;
+
+            m_Scale = scale;
 
             if (m_ThreadRunning)
                 StopRenderLoop();
@@ -108,10 +98,15 @@ namespace MonoGameRayTracer
             m_RenderWidth = (int)(screenWidth * scale);
             m_RenderHeight = (int)(screenHeight * scale);
 
+            if (m_backBufferTexture != null)
+                m_backBufferTexture.Dispose();
+
             m_backBufferTexture = new Texture2D(device, m_RenderWidth, m_RenderHeight, false, SurfaceFormat.Color);
             m_BackBuffer = new Color[m_RenderWidth * m_RenderHeight];
 
-            m_Scale = scale;
+            for (var y = 0; y < m_nbSlicePixels; y++)
+                for (var x = 0; x < m_nbSlicePixels; x++)
+                    m_subRects[x + y * m_nbSlicePixels] = new SubRect(x, y, m_RenderWidth, m_RenderHeight, m_nbSlicePixels);
 
             return true;
         }
@@ -260,8 +255,8 @@ namespace MonoGameRayTracer
 
             for (var s = 0; s < m_Step; s++)
             {
-                var u = (float)(x + Random.Value) / subRect.Rect.Width;
-                var v = (float)(y + Random.Value) / subRect.Rect.Height;
+                var u = (float)(x + Random.Value) / m_RenderWidth;
+                var v = (float)(y + Random.Value) / m_RenderHeight;
                 var ray = camera.GetRay(ref u, ref v);
                 color += GetColor(ref ray, world, 0);
             }
@@ -282,7 +277,7 @@ namespace MonoGameRayTracer
 
         public void Present(SpriteBatch spriteBatch, ref Rectangle rectangle)
         {
-            spriteBatch.Draw(m_backBufferTexture, Vector2.Zero, null, Color.White, 0, Vector2.Zero, Vector2.One, SpriteEffects.FlipVertically, 0);
+            spriteBatch.Draw(m_backBufferTexture, rectangle, null, Color.White, 0, Vector2.Zero, SpriteEffects.FlipVertically, 0);
         }
     }
 }

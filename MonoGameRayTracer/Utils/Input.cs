@@ -37,7 +37,8 @@ namespace MonoGameRayTracer.Utils
             if (m_LastMouseState.X + m_LastMouseState.Y == 0)
                 m_LastMouseState = m_MouseState;
 
-            m_Axis = m_MouseState.Position - m_LastMouseState.Position;
+            m_Axis.X = m_MouseState.X - m_LastMouseState.X;
+            m_Axis.Y = m_MouseState.Y - m_LastMouseState.Y;
         }
     }
 }

@@ -32,8 +32,23 @@ namespace MonoGameRayTracer
 
         protected override void LoadContent()
         {
-            m_GraphicsDeviceManager.PreferredBackBufferWidth = 320;
-            m_GraphicsDeviceManager.PreferredBackBufferHeight = 240;
+            var width = 640;
+            var height = 480;
+            var scale = 0.75f;
+            var rayStep = 15;
+            var sceneComplexity = 5;
+
+            var config = new ConfigParser("config.ini");
+            config.GetBool("showUI", ref m_ShowUI);
+            config.GetBool("Realtime", ref m_Realtime);
+            config.GetInteger("Width", ref width);
+            config.GetInteger("Height", ref height);
+            config.GetFloat("Scale", ref scale);
+            config.GetInteger("Step", ref rayStep);
+            config.GetInteger("SceneComplexity", ref sceneComplexity);
+
+            m_GraphicsDeviceManager.PreferredBackBufferWidth = width;
+            m_GraphicsDeviceManager.PreferredBackBufferHeight = height;
             m_GraphicsDeviceManager.ApplyChanges();
 
             m_FrontbufferRect = new Rectangle(0, 0, m_GraphicsDeviceManager.PreferredBackBufferWidth, m_GraphicsDeviceManager.PreferredBackBufferHeight);
@@ -41,18 +56,19 @@ namespace MonoGameRayTracer
             m_SpriteBatch = new SpriteBatch(GraphicsDevice);
             m_SpriteFont = Content.Load<SpriteFont>("Default");
 
-            m_RayTracer = new RayTracer(GraphicsDevice, 1.0f);
+            m_RayTracer = new RayTracer(GraphicsDevice, scale);
+            m_RayTracer.Step = rayStep;
 
             // Prepare the scene.
             var list = new List<Hitable>();
             list.Add(new Sphere(new Vector3(0, -1000, 0), 1000, new LambertMaterial(0.5f, 0.5f, 0.5f)));
 
             var temp = new Vector3(4, 0.2f, 0);
-            var step = 3;
 
-            for (var a = -step; a < step; a++)
+
+            for (var a = -sceneComplexity; a < sceneComplexity; a++)
             {
-                for (var b = -step; b < step; b++)
+                for (var b = -sceneComplexity; b < sceneComplexity; b++)
                 {
                     var chooseMat = Random.Value;
                     var center = new Vector3(a + 0.9f + Random.Value, 0.2f, b + 0.9f + Random.Value);

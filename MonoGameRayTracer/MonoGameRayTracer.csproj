@@ -51,6 +51,7 @@
     <Compile Include="Materials\Material.cs" />
     <Compile Include="Materials\MetalMaterial.cs" />
     <Compile Include="RayTracer.cs" />
+    <Compile Include="Utils\ConfigParser.cs" />
     <Compile Include="Utils\Input.cs" />
     <Compile Include="Utils\Mathf.cs" />
     <Compile Include="Utils\Random.cs" />

@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("MonoGameRayTracer")]
 [assembly: AssemblyProduct("MonoGameRayTracer")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("A Raytracer powered by MonoGame")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyCopyright("Copyright ©  2018")]
 [assembly: AssemblyTrademark("")]
