@@ -10,20 +10,19 @@ namespace MonoGameRayTracer
 {
     public class SubRect
     {
-        public int X { get; private set; }
-        public int Y { get; private set; }
-        public int Width { get; private set; }
-        public int Height { get; private set; }
+        public Rectangle Rect { get; private set; }
         public Color[] Buffer { get; private set; }
 
         public SubRect(int x, int y, int width, int height, int slice)
         {
-            X = x;
-            Y = y;
-            Width = width / slice;
-            Height = height / slice;
+            var xMin = width / slice * x;
+            var yMin = height / slice * y;
+
+            Rect = new Rectangle(xMin, yMin, width / slice, height / slice);
             Buffer = new Color[width / slice * height / slice];
         }
+
+        public override string ToString() => Rect.ToString();
     }
 
     public class RayTracer : IDisposable
@@ -71,6 +70,8 @@ namespace MonoGameRayTracer
 
         public float Scale => m_Scale;
 
+        public Texture2D Texture => m_backBufferTexture;
+
         public RayTracer(GraphicsDevice device, float multiplier)
         {
             var screenWidth = device.PresentationParameters.BackBufferWidth;
@@ -88,15 +89,31 @@ namespace MonoGameRayTracer
 
             m_subRects = new SubRect[m_nbSlicePixels * m_nbSlicePixels];
 
-            for (int y = 0; y < m_nbSlicePixels; y++)
-            {
-                for (int x = 0; x < m_nbSlicePixels; x++)
-                {
-                    var yMin = m_RenderHeight / m_nbSlicePixels * y;
-                    var xMin = m_RenderWidth / m_nbSlicePixels * x;
-                    m_subRects[x + m_nbSlicePixels * y] = new SubRect(xMin, yMin, m_RenderWidth, m_RenderHeight, m_nbSlicePixels);
-                }
-            }
+            for (var y = 0; y < m_nbSlicePixels; y++)
+                for (var x = 0; x < m_nbSlicePixels; x++)
+                    m_subRects[x + y * m_nbSlicePixels] = new SubRect(x, y, m_RenderWidth, m_RenderHeight, m_nbSlicePixels);
+        }
+
+        public bool SetupBuffers(GraphicsDevice device, float scale)
+        {
+            if (scale < 0.1f)
+                return false;
+
+            if (m_ThreadRunning)
+                StopRenderLoop();
+
+            var screenWidth = device.PresentationParameters.BackBufferWidth;
+            var screenHeight = device.PresentationParameters.BackBufferHeight;
+
+            m_RenderWidth = (int)(screenWidth * scale);
+            m_RenderHeight = (int)(screenHeight * scale);
+
+            m_backBufferTexture = new Texture2D(device, m_RenderWidth, m_RenderHeight, false, SurfaceFormat.Color);
+            m_BackBuffer = new Color[m_RenderWidth * m_RenderHeight];
+
+            m_Scale = scale;
+
+            return true;
         }
 
         private Vector3 GetColor(Ray ray, Hitable world, int depth) => GetColor(ref ray, world, depth);
@@ -149,6 +166,8 @@ namespace MonoGameRayTracer
 
         public void StopRenderLoop()
         {
+            m_ThreadRunning = false;
+
             foreach (var thread in m_Threads)
                 if (thread.IsAlive)
                     thread.Abort();
@@ -185,7 +204,7 @@ namespace MonoGameRayTracer
         {
             m_Stopwatch.Restart();
 
-            for (var j = m_RenderHeight - 1; j >= 0; j--)
+            for (var j = 0; j < m_RenderHeight; j++)
                 for (var i = 0; i < m_RenderWidth; i++)
                     UpdatePixel(ref i, ref j, camera, world);
 
@@ -217,16 +236,16 @@ namespace MonoGameRayTracer
 
         private void RenderMT(Camera camera, Hitable world, SubRect subRect)
         {
-            if (subRect.X == 0 && subRect.Y == 0)
+            if (subRect.Rect.X == 0 && subRect.Rect.Y == 0)
                 m_Stopwatch.Restart();
 
-            for (var j = 0; j < subRect.Height - 1; j++)
-                for (var i = 0; i < subRect.Width - 1; i++)
+            for (var j = 0; j < subRect.Rect.Height; j++)
+                for (var i = 0; i < subRect.Rect.Width; i++)
                     UpdatePixelMT(ref i, ref j, camera, world, subRect);
 
-            m_backBufferTexture.SetData<Color>(0, new Rectangle(subRect.X, subRect.Y, subRect.Width, subRect.Height), subRect.Buffer, 0, subRect.Buffer.Length);
+            m_backBufferTexture.SetData<Color>(0, new Rectangle(subRect.Rect.X, subRect.Rect.Y, subRect.Rect.Width, subRect.Rect.Height), subRect.Buffer, 0, subRect.Buffer.Length);
 
-            if (subRect.X == 0 && subRect.Y == 0)
+            if (subRect.Rect.X == 0 && subRect.Rect.Y == 0)
             {
                 m_Stopwatch.Stop();
                 m_LastFrameTime = m_Stopwatch.ElapsedMilliseconds;
@@ -236,13 +255,13 @@ namespace MonoGameRayTracer
         private void UpdatePixelMT(ref int i, ref int j, Camera camera, Hitable world, SubRect subRect)
         {
             var color = Vector3.Zero;
-            int x = i + subRect.X;
-            int y = j + subRect.Y;
+            int x = i + subRect.Rect.X;
+            int y = j + subRect.Rect.Y;
 
             for (var s = 0; s < m_Step; s++)
             {
-                var u = (float)(x + Random.Value) / subRect.Width;
-                var v = (float)(y + Random.Value) / subRect.Height;
+                var u = (float)(x + Random.Value) / subRect.Rect.Width;
+                var v = (float)(y + Random.Value) / subRect.Rect.Height;
                 var ray = camera.GetRay(ref u, ref v);
                 color += GetColor(ref ray, world, 0);
             }
@@ -252,7 +271,7 @@ namespace MonoGameRayTracer
             color.Y = Mathf.Sqrt(color.Y);
             color.Z = Mathf.Sqrt(color.Z);
 
-            subRect.Buffer[i + j * subRect.Width] = new Color(color.X, color.Y, color.Z);
+            subRect.Buffer[i + j * subRect.Rect.Width] = new Color(color.X, color.Y, color.Z);
         }
 
         public void Dispose()
@@ -263,7 +282,7 @@ namespace MonoGameRayTracer
 
         public void Present(SpriteBatch spriteBatch, ref Rectangle rectangle)
         {
-            spriteBatch.Draw(m_backBufferTexture, rectangle, null, Color.White, 0, Vector2.Zero, SpriteEffects.FlipVertically, 0);
+            spriteBatch.Draw(m_backBufferTexture, Vector2.Zero, null, Color.White, 0, Vector2.Zero, Vector2.One, SpriteEffects.FlipVertically, 0);
         }
     }
 }
