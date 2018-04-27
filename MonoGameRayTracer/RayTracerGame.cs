@@ -31,8 +31,8 @@ namespace MonoGameRayTracer
 
         protected override void LoadContent()
         {
-            m_GraphicsDeviceManager.PreferredBackBufferWidth = 1280;
-            m_GraphicsDeviceManager.PreferredBackBufferHeight = 720;
+            m_GraphicsDeviceManager.PreferredBackBufferWidth = 320;
+            m_GraphicsDeviceManager.PreferredBackBufferHeight = 240;
             m_GraphicsDeviceManager.ApplyChanges();
 
             m_FrontbufferRect = new Rectangle(0, 0, m_GraphicsDeviceManager.PreferredBackBufferWidth, m_GraphicsDeviceManager.PreferredBackBufferHeight);
@@ -40,7 +40,7 @@ namespace MonoGameRayTracer
             m_SpriteBatch = new SpriteBatch(GraphicsDevice);
             m_SpriteFont = Content.Load<SpriteFont>("Default");
 
-            m_RayTracer = new RayTracer(GraphicsDevice, 0.75f);
+            m_RayTracer = new RayTracer(GraphicsDevice, 1);
 
             // Prepare the scene.
             var list = new List<Hitable>();
@@ -81,7 +81,7 @@ namespace MonoGameRayTracer
             if (!m_Realtime)
                 m_RayTracer.Render(m_Camera, m_World);
             else
-                m_RayTracer.StartThreadedRenderLoop(m_Camera, m_World);
+                m_RayTracer.StartRenderLoop(m_Camera, m_World);
         }
 
         protected override void Update(GameTime gameTime)
@@ -109,9 +109,9 @@ namespace MonoGameRayTracer
             {
                 m_Realtime = !m_Realtime;
                 if (m_Realtime)
-                    m_RayTracer.StartThreadedRenderLoop(m_Camera, m_World);
+                    m_RayTracer.StartMTRenderLoop(m_Camera, m_World);
                 else
-                    m_RayTracer.StopThreadedRenderingLoop();
+                    m_RayTracer.StopRenderLoop();
             }
 
             if (m_Input.GetKeyDown(Keys.F10))

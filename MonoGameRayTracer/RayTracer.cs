@@ -2,16 +2,35 @@
 using Microsoft.Xna.Framework.Graphics;
 using MonoGameRayTracer.Utils;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 
 namespace MonoGameRayTracer
 {
+    public class SubRect
+    {
+        public int X { get; private set; }
+        public int Y { get; private set; }
+        public int Width { get; private set; }
+        public int Height { get; private set; }
+        public Color[] Buffer { get; private set; }
+
+        public SubRect(int x, int y, int width, int height, int slice)
+        {
+            X = x;
+            Y = y;
+            Width = width / slice;
+            Height = height / slice;
+            Buffer = new Color[width / slice * height / slice];
+        }
+    }
+
     public class RayTracer : IDisposable
     {
         private Texture2D m_backBufferTexture;
         private Color[] m_BackBuffer;
-        private Thread m_Thread;
+        private List<Thread> m_Threads;
         private Stopwatch m_Stopwatch;
         private int m_RenderWidth;
         private int m_RenderHeight;
@@ -21,8 +40,8 @@ namespace MonoGameRayTracer
         private float m_LastFrameTime = 0.0f;
         private float m_Scale = 1.0f;
         private bool m_ThreadRunning = false;
-
-        private Thread[] m_PixelThreads;
+        private int m_nbSlicePixels = 4;
+        private SubRect[] m_subRects;
 
         public int MaxDepth
         {
@@ -65,6 +84,19 @@ namespace MonoGameRayTracer
 
             m_Scale = multiplier;
             m_Stopwatch = new Stopwatch();
+            m_Threads = new List<Thread>();
+
+            m_subRects = new SubRect[m_nbSlicePixels * m_nbSlicePixels];
+
+            for (int y = 0; y < m_nbSlicePixels; y++)
+            {
+                for (int x = 0; x < m_nbSlicePixels; x++)
+                {
+                    var yMin = m_RenderHeight / m_nbSlicePixels * y;
+                    var xMin = m_RenderWidth / m_nbSlicePixels * x;
+                    m_subRects[x + m_nbSlicePixels * y] = new SubRect(xMin, yMin, m_RenderWidth, m_RenderHeight, m_nbSlicePixels);
+                }
+            }
         }
 
         private Vector3 GetColor(Ray ray, Hitable world, int depth) => GetColor(ref ray, world, depth);
@@ -94,14 +126,14 @@ namespace MonoGameRayTracer
             return (1.0f - t) * Vector3.One + t * new Vector3(0.5f, 0.7f, 1.0f);
         }
 
-        public void StartThreadedRenderLoop(Camera camera, Hitable world)
+        public void StartRenderLoop(Camera camera, Hitable world)
         {
             if (m_ThreadRunning)
                 throw new Exception("The Thread is still running");
 
             m_ThreadRunning = true;
 
-            m_Thread = new Thread(() =>
+            var thread = new Thread(() =>
             {
                 while (m_ThreadRunning)
                 {
@@ -110,42 +142,43 @@ namespace MonoGameRayTracer
                 }
             });
 
-            m_Thread.Start();
+            m_Threads.Add(thread);
+
+            thread.Start();
         }
 
-        public void StopThreadedRenderingLoop()
+        public void StopRenderLoop()
         {
-            if (m_Thread != null && m_Thread.IsAlive)
-            {
-                m_ThreadRunning = false;
-                m_Thread.Abort();
-            }
+            foreach (var thread in m_Threads)
+                if (thread.IsAlive)
+                    thread.Abort();
         }
 
-        public void RenderMultithread(Camera camera, Hitable world)
+        public void StartMTRenderLoop(Camera camera, Hitable world)
         {
-            var threadCount = 4;
-            var threadCountPerTwo = threadCount / 2;
-            var chunckX = m_RenderWidth / threadCountPerTwo;
-            var chunckY = m_RenderHeight / threadCountPerTwo;
+            if (m_ThreadRunning)
+                throw new Exception("The Thread is still running");
 
-            if (m_PixelThreads == null)
+            m_ThreadRunning = true;
+
+            for (var i = 0; i < m_subRects.Length; i++)
+                StartThreadedRenderLoop(camera, world, m_subRects[i]);
+        }
+
+        private void StartThreadedRenderLoop(Camera camera, Hitable world, SubRect subRect)
+        {
+            var thread = new Thread(() =>
             {
-                m_PixelThreads = new Thread[threadCount];
-
-                for (var x = 0; x < threadCount; x++)
+                while (m_ThreadRunning)
                 {
-                    m_PixelThreads[x] = new Thread(() =>
-                    {
-                        /*for (var j = m_RenderHeight - 1; j >= 0; j--)
-                            for (var i = 0; i < m_RenderWidth; i++)
-                                UpdatePixel(ref i, ref j, camera, world);*/
-                    });
+                    RenderMT(camera, world, subRect);
+                    Thread.Sleep(m_ThreadSleepTime);
                 }
-            }
+            });
 
-            for (var i = 0; i < threadCount; i++)
-                m_PixelThreads[i].Start();
+            m_Threads.Add(thread);
+
+            thread.Start();
         }
 
         public void Render(Camera camera, Hitable world)
@@ -160,11 +193,6 @@ namespace MonoGameRayTracer
 
             m_Stopwatch.Stop();
             m_LastFrameTime = m_Stopwatch.ElapsedMilliseconds;
-        }
-
-        public void Present(SpriteBatch spriteBatch, ref Rectangle rectangle)
-        {
-            spriteBatch.Draw(m_backBufferTexture, rectangle, null, Color.White, 0, Vector2.Zero, SpriteEffects.FlipVertically, 0);
         }
 
         private void UpdatePixel(ref int i, ref int j, Camera camera, Hitable world)
@@ -187,10 +215,55 @@ namespace MonoGameRayTracer
             m_BackBuffer[i + j * m_RenderWidth] = new Color(color.X, color.Y, color.Z);
         }
 
+        private void RenderMT(Camera camera, Hitable world, SubRect subRect)
+        {
+            if (subRect.X == 0 && subRect.Y == 0)
+                m_Stopwatch.Restart();
+
+            for (var j = 0; j < subRect.Height - 1; j++)
+                for (var i = 0; i < subRect.Width - 1; i++)
+                    UpdatePixelMT(ref i, ref j, camera, world, subRect);
+
+            m_backBufferTexture.SetData<Color>(0, new Rectangle(subRect.X, subRect.Y, subRect.Width, subRect.Height), subRect.Buffer, 0, subRect.Buffer.Length);
+
+            if (subRect.X == 0 && subRect.Y == 0)
+            {
+                m_Stopwatch.Stop();
+                m_LastFrameTime = m_Stopwatch.ElapsedMilliseconds;
+            }
+        }
+
+        private void UpdatePixelMT(ref int i, ref int j, Camera camera, Hitable world, SubRect subRect)
+        {
+            var color = Vector3.Zero;
+            int x = i + subRect.X;
+            int y = j + subRect.Y;
+
+            for (var s = 0; s < m_Step; s++)
+            {
+                var u = (float)(x + Random.Value) / subRect.Width;
+                var v = (float)(y + Random.Value) / subRect.Height;
+                var ray = camera.GetRay(ref u, ref v);
+                color += GetColor(ref ray, world, 0);
+            }
+
+            color /= (float)m_Step;
+            color.X = Mathf.Sqrt(color.X);
+            color.Y = Mathf.Sqrt(color.Y);
+            color.Z = Mathf.Sqrt(color.Z);
+
+            subRect.Buffer[i + j * subRect.Width] = new Color(color.X, color.Y, color.Z);
+        }
+
         public void Dispose()
         {
-            StopThreadedRenderingLoop();
+            StopRenderLoop();
             m_backBufferTexture.Dispose();
+        }
+
+        public void Present(SpriteBatch spriteBatch, ref Rectangle rectangle)
+        {
+            spriteBatch.Draw(m_backBufferTexture, rectangle, null, Color.White, 0, Vector2.Zero, SpriteEffects.FlipVertically, 0);
         }
     }
 }
