@@ -50,6 +50,8 @@ namespace MonoGameRayTracer
 
         public float Scale => m_Scale;
 
+        public Texture2D Texture => m_backBufferTexture;
+
         public RayTracer(GraphicsDevice device, float multiplier)
         {
             var screenWidth = device.PresentationParameters.BackBufferWidth;
@@ -63,6 +65,28 @@ namespace MonoGameRayTracer
 
             m_Scale = multiplier;
             m_Stopwatch = new Stopwatch();
+        }
+
+        public bool SetupBuffers(GraphicsDevice device, float scale)
+        {
+            if (scale < 0.1f)
+                return false;
+
+            if (m_ThreadRunning)
+                StopThreadedRenderingLoop();
+
+            var screenWidth = device.PresentationParameters.BackBufferWidth;
+            var screenHeight = device.PresentationParameters.BackBufferHeight;
+
+            m_RenderWidth = (int)(screenWidth * scale);
+            m_RenderHeight = (int)(screenHeight * scale);
+
+            m_backBufferTexture = new Texture2D(device, m_RenderWidth, m_RenderHeight, false, SurfaceFormat.Color);
+            m_BackBuffer = new Color[m_RenderWidth * m_RenderHeight];
+
+            m_Scale = scale;
+
+            return true;
         }
 
         private Vector3 GetColor(Ray ray, Hitable world, int depth) => GetColor(ref ray, world, depth);
@@ -124,7 +148,7 @@ namespace MonoGameRayTracer
         {
             m_Stopwatch.Restart();
 
-            for (var j = m_RenderHeight - 1; j >= 0; j--)
+            for (var j = 0; j < m_RenderHeight; j++)
                 for (var i = 0; i < m_RenderWidth; i++)
                     UpdatePixel(ref i, ref j, camera, world);
 

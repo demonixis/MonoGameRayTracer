@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Input;
 using MonoGameRayTracer.Materials;
 using MonoGameRayTracer.Utils;
 using System.Collections.Generic;
+using System.IO;
 
 namespace MonoGameRayTracer
 {
@@ -31,8 +32,8 @@ namespace MonoGameRayTracer
 
         protected override void LoadContent()
         {
-            m_GraphicsDeviceManager.PreferredBackBufferWidth = 1280;
-            m_GraphicsDeviceManager.PreferredBackBufferHeight = 720;
+            m_GraphicsDeviceManager.PreferredBackBufferWidth = 320;
+            m_GraphicsDeviceManager.PreferredBackBufferHeight = 240;
             m_GraphicsDeviceManager.ApplyChanges();
 
             m_FrontbufferRect = new Rectangle(0, 0, m_GraphicsDeviceManager.PreferredBackBufferWidth, m_GraphicsDeviceManager.PreferredBackBufferHeight);
@@ -40,7 +41,7 @@ namespace MonoGameRayTracer
             m_SpriteBatch = new SpriteBatch(GraphicsDevice);
             m_SpriteFont = Content.Load<SpriteFont>("Default");
 
-            m_RayTracer = new RayTracer(GraphicsDevice, 0.75f);
+            m_RayTracer = new RayTracer(GraphicsDevice, 1.0f);
 
             // Prepare the scene.
             var list = new List<Hitable>();
@@ -122,6 +123,30 @@ namespace MonoGameRayTracer
 
             if (m_Input.GetKeyDown(Keys.Delete))
                 m_RayTracer.MaxDepth--;
+
+            var upScale = m_Input.GetKeyDown(Keys.F2);
+            var downScale = m_Input.GetKeyDown(Keys.F1);
+
+            if (upScale || downScale)
+            {
+                var sign = upScale ? 1.0f : -1.0f;
+
+                if (m_RayTracer.SetupBuffers(GraphicsDevice, m_RayTracer.Scale + 0.05f * sign))
+                {
+                    if (m_Realtime)
+                        m_RayTracer.StartThreadedRenderLoop(m_Camera, m_World);
+                    else
+                        m_RayTracer.Render(m_Camera, m_World);
+                }
+            }
+
+            if (m_Input.GetKeyDown(Keys.S) && m_Input.GetKey(Keys.LeftControl))
+            {
+                var pp = GraphicsDevice.PresentationParameters;
+
+                using (var stream = File.OpenWrite("screenshot.png"))
+                    m_RayTracer.Texture.SaveAsPng(stream, pp.BackBufferWidth, pp.BackBufferHeight);
+            }
 
             // ---
             // --- Camera movements
