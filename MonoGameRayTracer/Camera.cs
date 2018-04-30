@@ -65,6 +65,7 @@ namespace MonoGameRayTracer
             m_Origin.Y += y;
             m_Origin.Z += z;
 
+            m_Origin += Vector3.Transform(new Vector3(x, y, z), Matrix.CreateFromYawPitchRoll(m_Rotation.Y, m_Rotation.X, m_Rotation.Z));
             m_LookAt = m_Origin + Vector3.Transform(Vector3.Forward, Matrix.CreateFromYawPitchRoll(m_Rotation.Y, m_Rotation.X, m_Rotation.Z));
 
             ComputeMatrix();
@@ -75,7 +76,6 @@ namespace MonoGameRayTracer
             m_Rotation.X += x;
             m_Rotation.Y += y;
             m_Rotation.Z += z;
-
             m_LookAt = m_Origin + Vector3.Transform(Vector3.Forward, Matrix.CreateFromYawPitchRoll(m_Rotation.Y, m_Rotation.X, m_Rotation.Z));
 
             ComputeMatrix();

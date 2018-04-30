@@ -35,8 +35,8 @@ namespace MonoGameRayTracer
             var width = 640;
             var height = 480;
             var scale = 0.75f;
-            var rayStep = 15;
-            var sceneComplexity = 5;
+            var rayStep = 1;
+            var sceneComplexity = 1;
 
             var config = new ConfigParser("config.ini");
             config.GetBool("showUI", ref m_ShowUI);
@@ -64,7 +64,6 @@ namespace MonoGameRayTracer
             list.Add(new Sphere(new Vector3(0, -1000, 0), 1000, new LambertMaterial(0.5f, 0.5f, 0.5f)));
 
             var temp = new Vector3(4, 0.2f, 0);
-
 
             for (var a = -sceneComplexity; a < sceneComplexity; a++)
             {
@@ -170,7 +169,7 @@ namespace MonoGameRayTracer
 
             if (m_Realtime)
             {
-                var rotationSpeed = -0.0001f * gameTime.ElapsedGameTime.Milliseconds;
+                var rotationSpeed = -0.001f * gameTime.ElapsedGameTime.Milliseconds;
                 var moveSpeed = 0.001f * gameTime.ElapsedGameTime.Milliseconds;
 
                 if (m_Input.GetKey(Keys.Up) || m_Input.GetKey(Keys.Z))
@@ -178,14 +177,14 @@ namespace MonoGameRayTracer
                 else if (m_Input.GetKey(Keys.Down) || m_Input.GetKey(Keys.S))
                     m_Camera.Move(0.0f, 0.0f, moveSpeed);
 
-                if (m_Input.GetKey(Keys.Left) || m_Input.GetKey(Keys.A))
+                if (m_Input.GetKey(Keys.Left) || m_Input.GetKey(Keys.Q))
                     m_Camera.Move(-moveSpeed, 0.0f, 0.0f);
-                else if (m_Input.GetKey(Keys.Right) || m_Input.GetKey(Keys.E))
+                else if (m_Input.GetKey(Keys.Right) || m_Input.GetKey(Keys.D))
                     m_Camera.Move(moveSpeed, 0.0f, 0.0f);
 
-                if (m_Input.GetKey(Keys.R))
+                if (m_Input.GetKey(Keys.E))
                     m_Camera.Move(0.0f, moveSpeed, 0.0f);
-                else if (m_Input.GetKey(Keys.F))
+                else if (m_Input.GetKey(Keys.A))
                     m_Camera.Move(0.0f, -moveSpeed, 0.0f);
 
                 m_Camera.Rotate(rotationSpeed * m_Input.Vertical, rotationSpeed * m_Input.Horizontal, 0.0f);
