@@ -76,8 +76,8 @@ namespace MonoGameRayTracer
         {
             m_Stopwatch = new Stopwatch();
             m_Threads = new List<Thread>();
-            m_subRects = new SubRect[m_nbSlicePixels * m_nbSlicePixels];
             m_nbSlicePixels = (int)Math.Sqrt(Environment.ProcessorCount);
+            m_subRects = new SubRect[m_nbSlicePixels * m_nbSlicePixels];
 
             SetupBuffers(device, scale);
         }

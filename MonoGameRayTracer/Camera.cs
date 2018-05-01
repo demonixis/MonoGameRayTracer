@@ -16,6 +16,11 @@ namespace MonoGameRayTracer
         private float m_FieldOfView;
         private float m_Aspect;
 
+        public Vector3 Position => m_Origin;
+        public Vector3 LowerLeftCorner => m_LowerLeftCorner;
+        public Vector3 Horizontal => m_Horizontal;
+        public Vector3 Vertical => m_Vertical;
+
         public Camera()
         {
             m_LowerLeftCorner = new Vector3(-2.0f, -1.0f, -1.0f);

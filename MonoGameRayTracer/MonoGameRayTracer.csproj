@@ -46,6 +46,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Camera.cs" />
+    <Compile Include="GPURaytracer.cs" />
     <Compile Include="Materials\DieletricMaterial.cs" />
     <Compile Include="Materials\LambertMaterial.cs" />
     <Compile Include="Materials\Material.cs" />

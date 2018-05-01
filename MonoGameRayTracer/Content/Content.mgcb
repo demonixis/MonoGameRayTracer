@@ -20,3 +20,9 @@
 /processorParam:TextureFormat=Compressed
 /build:Default.spritefont
 
+#begin Raytracer.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Raytracer.fx
+

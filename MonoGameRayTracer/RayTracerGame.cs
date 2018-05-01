@@ -197,6 +197,8 @@ namespace MonoGameRayTracer
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
+            base.Draw(gameTime);
+
             m_SpriteBatch.Begin();
 
             m_RayTracer.Present(m_SpriteBatch, ref m_FrontbufferRect);
@@ -225,8 +227,6 @@ namespace MonoGameRayTracer
             }
 
             m_SpriteBatch.End();
-
-            base.Draw(gameTime);
         }
     }
 }

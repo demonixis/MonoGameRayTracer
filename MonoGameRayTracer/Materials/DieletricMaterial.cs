@@ -12,6 +12,8 @@ namespace MonoGameRayTracer.Materials
     {
         float m_RefIdx;
 
+        public override Vector4 Value => new Vector4(m_RefIdx, 0, 0, 2);
+
         public DieletricMaterial(float refIdx)
         {
             m_RefIdx = refIdx;

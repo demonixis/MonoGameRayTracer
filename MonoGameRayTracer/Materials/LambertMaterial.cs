@@ -9,6 +9,8 @@ namespace MonoGameRayTracer.Materials
 
         public Vector3 Albedo => m_Albedo;
 
+        public override Vector4 Value => new Vector4(m_Albedo.X, m_Albedo.Y, m_Albedo.Z, 0);
+
         public LambertMaterial(Vector3 albedo)
         {
             m_Albedo = albedo;
