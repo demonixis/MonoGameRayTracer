@@ -34,7 +34,7 @@ namespace MonoGameRayTracer
         {
             var width = 640;
             var height = 480;
-            var scale = 0.75f;
+            var scale = 1f;
             var rayStep = 1;
             var sceneComplexity = 1;
 
@@ -93,6 +93,8 @@ namespace MonoGameRayTracer
 
             m_Camera = new Camera(new Vector3(0, 0.5f, 4.5f), new Vector3(-0.22f, 0.15f, 0.0f), Vector3.Up, 75.0f, aspect);
             m_World = new HitableList(list);
+
+            new GPURaytracer(this, list, m_Camera, 640, 480);
 
             if (!m_Realtime)
                 m_RayTracer.Render(m_Camera, m_World);

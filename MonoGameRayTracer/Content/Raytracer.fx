@@ -9,7 +9,7 @@ int RenderHeight;
 texture SceneTexture;
 sampler sceneSampler = sampler_state
 {
-	Texture = <sceneTexture>;
+	Texture = <SceneTexture>;
 	MinFilter = Anisotropic;
 	MagFilter = Linear;
 	MipFilter = Linear;
@@ -18,16 +18,21 @@ sampler sceneSampler = sampler_state
 texture NoiseTexture;
 sampler noiseSampler = sampler_state
 {
-	Texture = <sceneTexture>;
+	Texture = <NoiseTexture>;
 	MinFilter = Anisotropic;
 	MagFilter = Linear;
 	MipFilter = Linear;
 };
 
+struct VertexShaderInput
+{
+	float4 Position : SV_Position;
+	float2 UV : TEXCOORD;
+};
+
 struct PixelShaderInput
 {
 	float4 Position : SV_Position;
-	float4 Color : COLOR0;
 	float2 UV : TEXCOORD0;
 };
 
@@ -37,17 +42,12 @@ struct Ray
 	float3 Direction;
 };
 
-struct Material
-{
-	float3 Value;
-};
-
 struct HitRecord
 {
 	float T;
 	float3 P;
 	float3 Normal;
-	Material Material;
+	float3 Material;
 	bool Result;
 };
 
@@ -57,12 +57,6 @@ struct ScatterResult
 	Ray Scattered;
 	float3 Attenuation;
 	bool Result;
-};
-
-struct RefractResult
-{
-	bool Result;
-	float3 Refracted;
 };
 
 float LengthSquared(float3 vec)
@@ -97,38 +91,12 @@ float3 MakeUnitVector(float vec)
 	return result;
 }
 
-RefractResult Refract(float3 v, float3 n, float niOverNt, float3 refracted)
-{
-	RefractResult result;
-
-	float3 uv = UnitVector(v);
-	float dt = dot(uv, n);
-	float discriminant = 1.0f - niOverNt * niOverNt * (1.0f - dt * dt);
-
-	if (discriminant > 0)
-	{
-		result.Refracted = niOverNt * (uv - n * dt) - n * sqrt(discriminant);
-		result.Result = true;
-		return result;
-	}
-
-	result.Refracted = refracted;
-	return result;
-}
-
-float Schlick(float cosine, float refIdx)
-{
-	float r0 = (1.0f - refIdx) / (1 + refIdx);
-	r0 = r0 * r0;
-	return r0 + (1.0f - r0) * pow((1.0f - cosine), 5.0f);
-}
-
 float3 PointAtParameter(Ray ray, float t)
 {
 	return ray.Origin + t * ray.Direction;
 }
 
-HitRecord SphereHit(Ray ray, float min, float max, float3 center, float radius, Material material)
+HitRecord SphereHit(Ray ray, float min, float max, float3 center, float radius, float3 material)
 {
 	HitRecord record;
 
@@ -225,8 +193,7 @@ HitRecord WorldHit(Ray ray, float min, float max)
 
 			// Pixel[i].XYZ => Albedo/Value
 			// Pixel[i].A => Type
-			Material material;
-			material.Value = pixel.xyz;
+			float3 material = pixel.xyz;
 
 			HitRecord hit = SphereHit(ray, min, closestSoFar, center, radius, material);
 
@@ -259,7 +226,7 @@ float3 GetColor(Ray ray, float2 uv)
 	{
 		if (record.Result == true)
 		{
-			ScatterResult scatterResult = Scatter(ray, record, uv, record.Material.Value);
+			ScatterResult scatterResult = Scatter(ray, record, uv, record.Material);
 
 			if (scatterResult.Result == true)
 			{
@@ -277,6 +244,14 @@ float3 GetColor(Ray ray, float2 uv)
 	float3 unitDirection = UnitVector(ray.Direction);
 	float t = 0.5f * (unitDirection.y + 1.0f);
 	return (1.0f - t) * float3(1.0f, 1.0f, 1.0f) + t * float3(0.5f, 0.7f, 1.0f);
+}
+
+PixelShaderInput VertexShaderFunction(VertexShaderInput input)
+{
+	PixelShaderInput output;
+	output.Position = input.Position;
+	output.UV = input.UV;
+	return output;
 }
 
 float4 PixelShaderFunction(PixelShaderInput input) : COLOR0
@@ -302,10 +277,7 @@ technique Technique0
 {
 	pass Raytracer
 	{
-#if SM4
+		VertexShader = compile vs_4_0 VertexShaderFunction();
 		PixelShader = compile ps_4_0 PixelShaderFunction();
-#else
-		PixelShader = compile ps_3_0 PixelShaderFunction();
-#endif
 	}
 }
