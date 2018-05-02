@@ -45,6 +45,8 @@
     <StartupObject>MonoGameRayTracer.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AABoundingBox.cs" />
+    <Compile Include="BVHNode.cs" />
     <Compile Include="Camera.cs" />
     <Compile Include="GPURaytracer.cs" />
     <Compile Include="Materials\DieletricMaterial.cs" />

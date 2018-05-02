@@ -9,5 +9,6 @@ namespace MonoGameRayTracer
         public Material Material => m_Material;
 
         public abstract bool Hit(ref Ray ray, float min, float max, ref HitRecord record);
+        public abstract bool BoundingBox(float t0, float t1, ref AABoundingBox box);
     }
 }

@@ -213,34 +213,37 @@ HitRecord WorldHit(Ray ray, float min, float max)
 
 float3 GetColor(Ray ray, float2 uv)
 {
-	uint depth = 0;
-	uint maxDepth = 50;
-	float3 color = float3(0.0f, 0.0f, 0.0f);
-
 	HitRecord record = WorldHit(ray, 0.001f, 10000000.0f);
 
-	bool wasInLoop = record.Result == true;
-	
-	[loop]
-	while (depth < maxDepth && record.Result == true)
+	uint depth = 0;
+	bool ret = record.Result;
+	bool wasInLoop = ret;
+	float3 color = float3(0.0f, 0.0f, 0.0f);
+
+	while (ret == true && depth < 5)
 	{
-		if (record.Result == true)
+		ScatterResult scatterResult = Scatter(ray, record, uv, record.Material);
+
+		ret = scatterResult.Result;
+
+		if (ret)
 		{
-			ScatterResult scatterResult = Scatter(ray, record, uv, record.Material);
-
-			if (scatterResult.Result == true)
-			{
+			if (depth == 0)
+				color = scatterResult.Attenuation;
+			else
 				color *= scatterResult.Attenuation;
-				record = WorldHit(scatterResult.Scattered, 0.001f, 10000000.0f);
-			}
-		}
 
-		depth++;
+			record = WorldHit(scatterResult.Scattered, 0.001f, 10000000.0f);
+
+			ret = record.Result;
+
+			depth++;
+		}
 	}
 
 	if (wasInLoop)
 		return color;
-		
+
 	float3 unitDirection = UnitVector(ray.Direction);
 	float t = 0.5f * (unitDirection.y + 1.0f);
 	return (1.0f - t) * float3(1.0f, 1.0f, 1.0f) + t * float3(0.5f, 0.7f, 1.0f);

@@ -62,5 +62,12 @@ namespace MonoGameRayTracer
 
             return false;
         }
+
+        public override bool BoundingBox(float t0, float t1, ref AABoundingBox box)
+        {
+            var bounds = new Vector3(m_Radius);
+            box = new AABoundingBox(m_Center - bounds, m_Center + bounds);
+            return true;
+        }
     }
 }

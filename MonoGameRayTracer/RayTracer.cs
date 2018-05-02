@@ -25,12 +25,15 @@ namespace MonoGameRayTracer
         public override string ToString() => Rect.ToString();
     }
 
-    public class RayTracer : IDisposable
+    public class RayTracer : DrawableGameComponent
     {
         private Texture2D m_backBufferTexture;
         private Color[] m_BackBuffer;
         private List<Thread> m_Threads;
         private Stopwatch m_Stopwatch;
+        private SubRect[] m_subRects;
+        private Rectangle m_DrawRectangle;
+        private SpriteBatch m_SpriteBatch;
         private int m_RenderWidth;
         private int m_RenderHeight;
         private int m_ThreadSleepTime = 10;
@@ -40,18 +43,6 @@ namespace MonoGameRayTracer
         private float m_Scale = 1.0f;
         private bool m_ThreadRunning = false;
         private int m_nbSlicePixels = 4;
-        private SubRect[] m_subRects;
-
-        public int MaxDepth
-        {
-            get => m_MaxDepth;
-            set
-            {
-                m_MaxDepth = value;
-                if (m_MaxDepth < 1)
-                    m_MaxDepth = 1;
-            }
-        }
 
         public int Step
         {
@@ -66,23 +57,45 @@ namespace MonoGameRayTracer
 
         public float FrameTime => m_LastFrameTime;
 
-        public bool ThreadRunning => m_ThreadRunning;
-
         public float Scale => m_Scale;
 
         public Texture2D Texture => m_backBufferTexture;
 
-        public RayTracer(GraphicsDevice device, float scale)
+        public RayTracer(Game game, float scale)
+            : base (game)
         {
             m_Stopwatch = new Stopwatch();
             m_Threads = new List<Thread>();
             m_nbSlicePixels = (int)Math.Sqrt(Environment.ProcessorCount);
             m_subRects = new SubRect[m_nbSlicePixels * m_nbSlicePixels];
+            m_SpriteBatch = new SpriteBatch(Game.GraphicsDevice);
 
-            SetupBuffers(device, scale);
+            SetupBuffers(scale);
+
+            game.Components.Add(this);
         }
 
-        public bool SetupBuffers(GraphicsDevice device, float scale)
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+
+            if (disposing)
+            {
+                StopRenderLoop();
+                m_backBufferTexture.Dispose();
+            }
+        }
+
+        public override void Draw(GameTime gameTime)
+        {
+            base.Draw(gameTime);
+
+            m_SpriteBatch.Begin();
+            m_SpriteBatch.Draw(m_backBufferTexture, m_DrawRectangle, null, Color.White, 0, Vector2.Zero, SpriteEffects.FlipVertically, 0);
+            m_SpriteBatch.End();
+        }
+
+        public bool SetupBuffers(float scale)
         {
             if (scale < 0.1f)
                 return false;
@@ -92,6 +105,7 @@ namespace MonoGameRayTracer
             if (m_ThreadRunning)
                 StopRenderLoop();
 
+            var device = Game.GraphicsDevice;
             var screenWidth = device.PresentationParameters.BackBufferWidth;
             var screenHeight = device.PresentationParameters.BackBufferHeight;
 
@@ -108,35 +122,12 @@ namespace MonoGameRayTracer
                 for (var x = 0; x < m_nbSlicePixels; x++)
                     m_subRects[x + y * m_nbSlicePixels] = new SubRect(x, y, m_RenderWidth, m_RenderHeight, m_nbSlicePixels);
 
+            m_DrawRectangle = new Rectangle(0, 0, screenWidth, screenHeight);
+
             return true;
         }
 
-        private Vector3 GetColor(Ray ray, Hitable world, int depth) => GetColor(ref ray, world, depth);
-
-        private Vector3 GetColor(ref Ray ray, Hitable world, int depth)
-        {
-            HitRecord record = new HitRecord();
-            if (world.Hit(ref ray, 0.001f, float.MaxValue, ref record))
-            {
-                var scattered = new Ray();
-                var attenuation = Vector3.Zero;
-
-                if (record.Material != null)
-                {
-                    if (depth < m_MaxDepth && record.Material.Scatter(ref ray, ref record, ref attenuation, ref scattered))
-                        return attenuation * GetColor(ref scattered, world, depth + 1);
-                    else
-                        return Vector3.Zero;
-                }
-
-                var target = record.P + record.Normal + Mathf.RandomInUnitySphere();
-                return 0.5f * GetColor(new Ray(record.P, target - record.P), world, depth);
-            }
-
-            var unitDirection = Mathf.UnitVector(ray.Direction);
-            var t = 0.5f * (unitDirection.Y + 1.0f);
-            return (1.0f - t) * Vector3.One + t * new Vector3(0.5f, 0.7f, 1.0f);
-        }
+        #region Threads Management
 
         public void StartRenderLoop(Camera camera, Hitable world)
         {
@@ -193,6 +184,73 @@ namespace MonoGameRayTracer
             m_Threads.Add(thread);
 
             thread.Start();
+        }
+
+#endregion
+
+        private Vector3 GetColorRecursive(Ray ray, Hitable world, int depth) => GetColorRecursive(ref ray, world, depth);
+
+        private Vector3 GetColorRecursive(ref Ray ray, Hitable world, int depth)
+        {
+            HitRecord record = new HitRecord();
+            if (world.Hit(ref ray, 0.001f, float.MaxValue, ref record))
+            {
+                var scattered = new Ray();
+                var attenuation = Vector3.Zero;
+
+                if (record.Material != null)
+                {
+                    if (depth < m_MaxDepth && record.Material.Scatter(ref ray, ref record, ref attenuation, ref scattered))
+                        return attenuation * GetColor(ref scattered, world, depth + 1);
+                    else
+                        return Vector3.Zero;
+                }
+
+                var target = record.P + record.Normal + Mathf.RandomInUnitySphere();
+                return 0.5f * GetColor(new Ray(record.P, target - record.P), world, depth);
+            }
+
+            var unitDirection = Mathf.UnitVector(ray.Direction);
+            var t = 0.5f * (unitDirection.Y + 1.0f);
+            return (1.0f - t) * Vector3.One + t * new Vector3(0.5f, 0.7f, 1.0f);
+        }
+
+        private Vector3 GetColor(Ray ray, Hitable world, int depth) => GetColor(ref ray, world, depth);
+
+        private Vector3 GetColor(ref Ray ray, Hitable world, int depth)
+        {
+            HitRecord record = new HitRecord();
+
+            var ret = world.Hit(ref ray, 0.001f, float.MaxValue, ref record);
+            var wasInLoop = ret;
+            var color = Vector3.Zero;
+
+            while (ret == true && depth < m_MaxDepth)
+            {
+                var scattered = new Ray();
+                var attenuation = Vector3.Zero;
+
+                ret = record.Material.Scatter(ref ray, ref record, ref attenuation, ref scattered);
+
+                if (ret)
+                {
+                    if (depth == 0)
+                        color = attenuation;
+                    else
+                        color *= attenuation;
+
+                    ret = world.Hit(ref scattered, 0.001f, float.MaxValue, ref record);
+
+                    depth++;
+                }
+            }
+
+            if (wasInLoop)
+                return color;
+
+            var unitDirection = Mathf.UnitVector(ray.Direction);
+            var t = 0.5f * (unitDirection.Y + 1.0f);
+            return (1.0f - t) * Vector3.One + t * new Vector3(0.5f, 0.7f, 1.0f);
         }
 
         public void Render(Camera camera, Hitable world)
@@ -267,17 +325,6 @@ namespace MonoGameRayTracer
             color.Z = Mathf.Sqrt(color.Z);
 
             subRect.Buffer[i + j * subRect.Rect.Width] = new Color(color.X, color.Y, color.Z);
-        }
-
-        public void Dispose()
-        {
-            StopRenderLoop();
-            m_backBufferTexture.Dispose();
-        }
-
-        public void Present(SpriteBatch spriteBatch, ref Rectangle rectangle)
-        {
-            spriteBatch.Draw(m_backBufferTexture, rectangle, null, Color.White, 0, Vector2.Zero, SpriteEffects.FlipVertically, 0);
         }
     }
 }

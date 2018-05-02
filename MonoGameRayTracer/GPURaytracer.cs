@@ -9,6 +9,7 @@ namespace MonoGameRayTracer
     {
         private QuadRenderer m_QuadRenderer;
         private Effect m_Effect;
+        private SpriteBatch m_SpriteBatch;
         private Texture2D m_NoiseTexture;
         private Texture2D m_SceneTexture;
         private RenderTarget2D m_finalTexture;
@@ -27,6 +28,7 @@ namespace MonoGameRayTracer
             m_Effect = game.Content.Load<Effect>("Raytracer");
             game.Components.Add(this);
             m_QuadRenderer = new QuadRenderer(game.GraphicsDevice);
+            m_SpriteBatch = new SpriteBatch(game.GraphicsDevice);
         }
 
         public void UpdateTextures(List<Hitable> world, int width, int height)
@@ -78,6 +80,10 @@ namespace MonoGameRayTracer
         {
             base.Draw(gameTime);
 
+            var m_GraphicsDevice = Game.GraphicsDevice;
+            m_GraphicsDevice.SetRenderTarget(m_finalTexture);
+            m_GraphicsDevice.SamplerStates[1] = SamplerState.LinearClamp;
+
             m_Effect.Parameters["SceneTexture"].SetValue(m_SceneTexture);
             m_Effect.Parameters["NoiseTexture"].SetValue(m_NoiseTexture);
             m_Effect.Parameters["LowerLeftCorner"].SetValue(m_Camera.LowerLeftCorner);
@@ -90,6 +96,14 @@ namespace MonoGameRayTracer
             m_Effect.CurrentTechnique.Passes[0].Apply();
 
             m_QuadRenderer.RenderFullscreenQuad();
+
+            m_GraphicsDevice.SetRenderTarget(null);
+
+            m_GraphicsDevice.Clear(Color.Black);
+
+            m_SpriteBatch.Begin();
+            m_SpriteBatch.Draw(m_finalTexture, m_Rectangle, Color.White);
+            m_SpriteBatch.End();
         }
     }
 }

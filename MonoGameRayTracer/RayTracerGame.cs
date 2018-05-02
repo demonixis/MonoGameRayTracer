@@ -18,7 +18,7 @@ namespace MonoGameRayTracer
         private SpriteFont m_SpriteFont;
         private Input m_Input;
         private Vector2[] m_StringPositions;
-        private RayTracer m_RayTracer;
+        private RayTracer m_Raytracer;
         private bool m_ShowUI = true;
         private bool m_Realtime = false;
 
@@ -57,9 +57,6 @@ namespace MonoGameRayTracer
             m_SpriteBatch = new SpriteBatch(GraphicsDevice);
             m_SpriteFont = Content.Load<SpriteFont>("Default");
 
-            m_RayTracer = new RayTracer(GraphicsDevice, scale);
-            m_RayTracer.Step = rayStep;
-
             // Prepare the scene.
             var list = new List<Hitable>();
             list.Add(new Sphere(new Vector3(0, -1000, 0), 1000, new LambertMaterial(0.5f, 0.5f, 0.5f)));
@@ -95,17 +92,20 @@ namespace MonoGameRayTracer
             m_Camera = new Camera(new Vector3(0, 0.5f, 4.5f), new Vector3(-0.22f, 0.15f, 0.0f), Vector3.Up, 75.0f, aspect);
             m_World = new HitableList(list);
 
+            m_Raytracer = new RayTracer(this, scale);
+            m_Raytracer.Step = rayStep;
+
             if (!m_Realtime)
-                m_RayTracer.Render(m_Camera, m_World);
+                m_Raytracer.Render(m_Camera, m_World);
             else
-                m_RayTracer.StartRenderLoop(m_Camera, m_World);
+                m_Raytracer.StartMTRenderLoop(m_Camera, m_World);
         }
 
         protected override void Update(GameTime gameTime)
         {
             if (m_Input.GetKeyDown(Keys.Escape))
             {
-                m_RayTracer.Dispose();
+                m_Raytracer.Dispose();
                 Exit();
             }
 
@@ -114,45 +114,39 @@ namespace MonoGameRayTracer
             // ---
 
             if (m_Input.GetKeyDown(Keys.PageUp))
-                m_RayTracer.Step++;
+                m_Raytracer.Step++;
 
             if (m_Input.GetKeyDown(Keys.PageDown))
-                m_RayTracer.Step--;
+                m_Raytracer.Step--;
 
             if (m_Input.GetKeyDown(Keys.F12) && !m_Realtime)
-                m_RayTracer.Render(m_Camera, m_World);
+                m_Raytracer.Render(m_Camera, m_World);
 
             if (m_Input.GetKeyDown(Keys.F11))
             {
                 m_Realtime = !m_Realtime;
                 if (m_Realtime)
-                    m_RayTracer.StartMTRenderLoop(m_Camera, m_World);
+                    m_Raytracer.StartMTRenderLoop(m_Camera, m_World);
                 else
-                    m_RayTracer.StopRenderLoop();
+                    m_Raytracer.StopRenderLoop();
             }
 
             if (m_Input.GetKeyDown(Keys.F10))
                 m_ShowUI = !m_ShowUI;
 
-            if (m_Input.GetKeyDown(Keys.Insert))
-                m_RayTracer.MaxDepth++;
-
-            if (m_Input.GetKeyDown(Keys.Delete))
-                m_RayTracer.MaxDepth--;
-
-            var upScale = m_Input.GetKeyDown(Keys.F2);
-            var downScale = m_Input.GetKeyDown(Keys.F1);
+            var upScale = m_Input.GetKeyDown(Keys.Insert);
+            var downScale = m_Input.GetKeyDown(Keys.Delete);
 
             if (upScale || downScale)
             {
                 var sign = upScale ? 1.0f : -1.0f;
 
-                if (m_RayTracer.SetupBuffers(GraphicsDevice, m_RayTracer.Scale + 0.05f * sign))
+                if (m_Raytracer.SetupBuffers(m_Raytracer.Scale + 0.05f * sign))
                 {
                     if (m_Realtime)
-                        m_RayTracer.StartMTRenderLoop(m_Camera, m_World);
+                        m_Raytracer.StartMTRenderLoop(m_Camera, m_World);
                     else
-                        m_RayTracer.Render(m_Camera, m_World);
+                        m_Raytracer.Render(m_Camera, m_World);
                 }
             }
 
@@ -161,7 +155,7 @@ namespace MonoGameRayTracer
                 var pp = GraphicsDevice.PresentationParameters;
 
                 using (var stream = File.OpenWrite("screenshot.png"))
-                    m_RayTracer.Texture.SaveAsPng(stream, pp.BackBufferWidth, pp.BackBufferHeight);
+                    m_Raytracer.Texture.SaveAsPng(stream, pp.BackBufferWidth, pp.BackBufferHeight);
             }
 
             // ---
@@ -202,13 +196,11 @@ namespace MonoGameRayTracer
 
             m_SpriteBatch.Begin();
 
-            m_RayTracer.Present(m_SpriteBatch, ref m_FrontbufferRect);
-
             if (m_ShowUI)
             {
                 if (m_StringPositions == null)
                 {
-                    var count = 7;
+                    var count = 6;
                     m_StringPositions = new Vector2[count];
 
                     for (var i = 0; i < count; i++)
@@ -219,12 +211,11 @@ namespace MonoGameRayTracer
                 }
 
                 m_SpriteBatch.DrawString(m_SpriteFont, $"Realtime: {m_Realtime}", m_StringPositions[0], Color.DarkGreen);
-                m_SpriteBatch.DrawString(m_SpriteFont, $"Elapsed Time: {m_RayTracer.FrameTime}ms", m_StringPositions[1], Color.DarkGreen);
-                m_SpriteBatch.DrawString(m_SpriteFont, $"Step: {m_RayTracer.Step}", m_StringPositions[2], Color.DarkGreen);
+                m_SpriteBatch.DrawString(m_SpriteFont, $"Elapsed Time: {m_Raytracer.FrameTime}ms", m_StringPositions[1], Color.DarkGreen);
+                m_SpriteBatch.DrawString(m_SpriteFont, $"Step: {m_Raytracer.Step}", m_StringPositions[2], Color.DarkGreen);
                 m_SpriteBatch.DrawString(m_SpriteFont, $"Screen Width: {m_GraphicsDeviceManager.PreferredBackBufferWidth}", m_StringPositions[3], Color.DarkGreen);
                 m_SpriteBatch.DrawString(m_SpriteFont, $"Screen Height: {m_GraphicsDeviceManager.PreferredBackBufferHeight}", m_StringPositions[4], Color.DarkGreen);
-                m_SpriteBatch.DrawString(m_SpriteFont, $"Render Scale: {m_RayTracer.Scale * 100.0f}%", m_StringPositions[5], Color.DarkGreen);
-                m_SpriteBatch.DrawString(m_SpriteFont, $"Depth: {m_RayTracer.MaxDepth}", m_StringPositions[6], Color.DarkGreen);
+                m_SpriteBatch.DrawString(m_SpriteFont, $"Render Scale: {m_Raytracer.Scale * 100.0f}%", m_StringPositions[5], Color.DarkGreen);
             }
 
             m_SpriteBatch.End();
