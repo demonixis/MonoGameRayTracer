@@ -7,7 +7,7 @@ namespace MonoGameRayTracer
 {
     public class GPURaytracer : DrawableGameComponent
     {
-        private SpriteBatch m_SpriteBatch;
+        private QuadRenderer m_QuadRenderer;
         private Effect m_Effect;
         private Texture2D m_NoiseTexture;
         private Texture2D m_SceneTexture;
@@ -22,10 +22,11 @@ namespace MonoGameRayTracer
             : base(game)
         {
             m_Camera = camera;
-            m_Step = 5;
+            m_Step = 1;
             UpdateTextures(world, width, height);
             m_Effect = game.Content.Load<Effect>("Raytracer");
             game.Components.Add(this);
+            m_QuadRenderer = new QuadRenderer(game.GraphicsDevice);
         }
 
         public void UpdateTextures(List<Hitable> world, int width, int height)
@@ -86,10 +87,9 @@ namespace MonoGameRayTracer
             m_Effect.Parameters["Step"].SetValue(m_Step);
             m_Effect.Parameters["RenderWidth"].SetValue(m_RenderWidth);
             m_Effect.Parameters["RenderHeight"].SetValue(m_RenderHeight);
+            m_Effect.CurrentTechnique.Passes[0].Apply();
 
-            m_SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Opaque, null, null, null, m_Effect);
-            m_SpriteBatch.Draw(m_finalTexture, m_Rectangle, Color.White);
-            m_SpriteBatch.End();
+            m_QuadRenderer.RenderFullscreenQuad();
         }
     }
 }

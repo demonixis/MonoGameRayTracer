@@ -49,6 +49,7 @@ namespace MonoGameRayTracer
 
             m_GraphicsDeviceManager.PreferredBackBufferWidth = width;
             m_GraphicsDeviceManager.PreferredBackBufferHeight = height;
+            m_GraphicsDeviceManager.GraphicsProfile = GraphicsProfile.HiDef;
             m_GraphicsDeviceManager.ApplyChanges();
 
             m_FrontbufferRect = new Rectangle(0, 0, m_GraphicsDeviceManager.PreferredBackBufferWidth, m_GraphicsDeviceManager.PreferredBackBufferHeight);
@@ -93,8 +94,6 @@ namespace MonoGameRayTracer
 
             m_Camera = new Camera(new Vector3(0, 0.5f, 4.5f), new Vector3(-0.22f, 0.15f, 0.0f), Vector3.Up, 75.0f, aspect);
             m_World = new HitableList(list);
-
-            new GPURaytracer(this, list, m_Camera, 640, 480);
 
             if (!m_Realtime)
                 m_RayTracer.Render(m_Camera, m_World);

@@ -51,6 +51,7 @@
     <Compile Include="Materials\LambertMaterial.cs" />
     <Compile Include="Materials\Material.cs" />
     <Compile Include="Materials\MetalMaterial.cs" />
+    <Compile Include="QuadRenderer.cs" />
     <Compile Include="RayTracer.cs" />
     <Compile Include="Utils\ConfigParser.cs" />
     <Compile Include="Utils\Input.cs" />

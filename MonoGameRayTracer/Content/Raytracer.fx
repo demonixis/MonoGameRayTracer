@@ -27,7 +27,7 @@ sampler noiseSampler = sampler_state
 struct VertexShaderInput
 {
 	float4 Position : SV_Position;
-	float2 UV : TEXCOORD;
+	float2 UV : TEXCOORD0;
 };
 
 struct PixelShaderInput
@@ -220,7 +220,7 @@ float3 GetColor(Ray ray, float2 uv)
 	HitRecord record = WorldHit(ray, 0.001f, 10000000.0f);
 
 	bool wasInLoop = record.Result == true;
-
+	
 	[loop]
 	while (depth < maxDepth && record.Result == true)
 	{
@@ -240,7 +240,7 @@ float3 GetColor(Ray ray, float2 uv)
 
 	if (wasInLoop)
 		return color;
-
+		
 	float3 unitDirection = UnitVector(ray.Direction);
 	float t = 0.5f * (unitDirection.y + 1.0f);
 	return (1.0f - t) * float3(1.0f, 1.0f, 1.0f) + t * float3(0.5f, 0.7f, 1.0f);
@@ -258,7 +258,8 @@ float4 PixelShaderFunction(PixelShaderInput input) : COLOR0
 {
 	float3 color = float3(0.0f, 0.0f, 0.0f);
 	float2 noise = tex2D(noiseSampler, input.UV);
-
+	
+	[loop]
 	for (int s = 0; s < Step; s++)
 	{
 		float u = (float)(input.UV.x + noise.x) / RenderWidth;
