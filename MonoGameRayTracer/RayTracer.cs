@@ -201,7 +201,7 @@ namespace MonoGameRayTracer
                 if (record.Material != null)
                 {
                     if (depth < m_MaxDepth && record.Material.Scatter(ref ray, ref record, ref attenuation, ref scattered))
-                        return attenuation * GetColor(ref scattered, world, depth + 1);
+                        return attenuation* GetColor(ref scattered, world, depth + 1);
                     else
                         return Vector3.Zero;
                 }
@@ -210,6 +210,7 @@ namespace MonoGameRayTracer
                 return 0.5f * GetColor(new Ray(record.P, target - record.P), world, depth);
             }
 
+            // Background color.
             var unitDirection = Mathf.UnitVector(ray.Direction);
             var t = 0.5f * (unitDirection.Y + 1.0f);
             return (1.0f - t) * Vector3.One + t * new Vector3(0.5f, 0.7f, 1.0f);
@@ -248,6 +249,7 @@ namespace MonoGameRayTracer
             if (wasInLoop)
                 return color;
 
+            // Background color.
             var unitDirection = Mathf.UnitVector(ray.Direction);
             var t = 0.5f * (unitDirection.Y + 1.0f);
             return (1.0f - t) * Vector3.One + t * new Vector3(0.5f, 0.7f, 1.0f);

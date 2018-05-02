@@ -1,0 +1,33 @@
+﻿using Microsoft.Xna.Framework;
+using MonoGameRayTracer.Utils;
+
+namespace MonoGameRayTracer.Textures
+{
+    public class CheckerTexture : Texture
+    {
+        private Texture m_OddTexture;
+        private Texture m_EvenTexture;
+
+        public CheckerTexture()
+        {
+            m_EvenTexture = new ConstantTexture(new Vector3(0.3f, 0.3f, 0.3f));
+            m_OddTexture = new ConstantTexture(new Vector3(0.9f, 0.9f, 0.9f));
+        }
+
+        public CheckerTexture(Texture odd, Texture even)
+        {
+            m_OddTexture = odd;
+            m_EvenTexture = even;
+        }
+
+        public override Vector3 Tex2D(float u, float v, ref Vector3 vector)
+        {
+            var sines = Mathf.Sin(10.0f * vector.X) * Mathf.Sin(10.0f * vector.Y) * Mathf.Sin(10.0f * vector.Z);
+
+            if (sines < 0)
+                return m_OddTexture.Tex2D(u, v, ref vector);
+
+            return m_EvenTexture.Tex2D(u, v, ref vector);
+        }
+    }
+}

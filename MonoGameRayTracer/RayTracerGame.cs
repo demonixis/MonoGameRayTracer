@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGameRayTracer.Materials;
+using MonoGameRayTracer.Textures;
 using MonoGameRayTracer.Utils;
 using System.Collections.Generic;
 using System.IO;
@@ -34,7 +35,7 @@ namespace MonoGameRayTracer
         {
             var width = 640;
             var height = 480;
-            var scale = 1f;
+            var scale = 0.75f;
             var rayStep = 1;
             var sceneComplexity = 1;
 
@@ -59,7 +60,7 @@ namespace MonoGameRayTracer
 
             // Prepare the scene.
             var list = new List<Hitable>();
-            list.Add(new Sphere(new Vector3(0, -1000, 0), 1000, new LambertMaterial(0.5f, 0.5f, 0.5f)));
+            list.Add(new Sphere(new Vector3(0, -1000, 0), 1000, new LambertMaterial(new CheckerTexture())));
 
             var temp = new Vector3(4, 0.2f, 0);
 
@@ -82,8 +83,10 @@ namespace MonoGameRayTracer
                 }
             }
 
-            list.Add(new Sphere(new Vector3(0, 1, 0), 1, new DieletricMaterial(1.5f)));
-            list.Add(new Sphere(new Vector3(-4, 1, 0), 1, new LambertMaterial(0.4f, 0.2f, 0.1f)));
+            var earthTexture = Content.Load<Texture2D>("earth");
+
+            list.Add(new Sphere(new Vector3(0, 1, 0), 1, new LambertMaterial(new ImageTexture(earthTexture))));
+            list.Add(new Sphere(new Vector3(-4, 1, 0), 1, new LambertMaterial(new NoiseTexture())));
             list.Add(new Sphere(new Vector3(4, 1, 0), 1, new MetalMaterial(0.7f, 0.6f, 0.5f, 0.0f)));
 
             // Final setup.

@@ -51,5 +51,8 @@ namespace MonoGameRayTracer.Utils
 
         public static float Tan(float value) => (float)Math.Tan(value);
         public static float Sqrt(float value) => (float)Math.Sqrt(value);
+        public static float Sin(float value) => (float)Math.Sin(value);
+        public static float Cos(float value) => (float)Math.Cos(value);
+        public static float Floor(float value) => (float)Math.Floor(value);
     }
 }

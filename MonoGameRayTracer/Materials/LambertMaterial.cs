@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using MonoGameRayTracer.Textures;
 using MonoGameRayTracer.Utils;
 
 namespace MonoGameRayTracer.Materials
@@ -6,6 +7,7 @@ namespace MonoGameRayTracer.Materials
     public class LambertMaterial : Material
     {
         private Vector3 m_Albedo;
+        private Texture m_Texture;
 
         public Vector3 Albedo => m_Albedo;
 
@@ -14,6 +16,11 @@ namespace MonoGameRayTracer.Materials
         public LambertMaterial(Vector3 albedo)
         {
             m_Albedo = albedo;
+        }
+
+        public LambertMaterial(Texture texture)
+        {
+            m_Texture = texture;
         }
 
         public LambertMaterial(float x, float y, float z)
@@ -25,7 +32,7 @@ namespace MonoGameRayTracer.Materials
         {
             var target = record.P + record.Normal + Mathf.RandomInUnitySphere();
             scattered = new Ray(record.P, target - record.P);
-            attenuation = m_Albedo;
+            attenuation = m_Texture != null ? m_Texture.Tex2D(0, 0, ref record.P) : m_Albedo;
             return true;
         }
     }

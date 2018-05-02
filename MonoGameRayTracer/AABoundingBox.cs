@@ -52,5 +52,22 @@ namespace MonoGameRayTracer
         }
 
         private float[] VectorToArray(Vector3 vector) => new[] { vector.X, vector.Y, vector.Z };
+
+        public static AABoundingBox SurroundingBox(ref AABoundingBox box0, ref AABoundingBox box1)
+        {
+            Vector3 small = new Vector3(
+                Math.Min(box0.Min.X, box1.Min.X),
+                Math.Min(box0.Min.Y, box1.Min.Y),
+                Math.Min(box0.Min.Z, box1.Min.Z)
+            );
+
+            Vector3 big = new Vector3(
+                Math.Min(box0.Max.X, box1.Max.X),
+                Math.Min(box0.Max.Y, box1.Max.Y),
+                Math.Min(box0.Max.Z, box1.Max.Z)
+            );
+
+            return new AABoundingBox(small, big);
+        }
     }
 }

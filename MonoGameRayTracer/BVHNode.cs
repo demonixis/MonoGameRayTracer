@@ -1,4 +1,6 @@
-﻿namespace MonoGameRayTracer
+﻿using System.Collections.Generic;
+
+namespace MonoGameRayTracer
 {
     public class BVHNode : Hitable
     {
@@ -6,10 +8,42 @@
         private Hitable m_Right;
         private AABoundingBox m_BoundingBox;
 
-        public BVHNode(Hitable hitable, int n, float t0, float t1)
+        public BVHNode(List<Hitable> scene, int n, float t0, float t1)
         {
             var axis = (int)(Random.Value * 3.0f);
-            
+
+            if (axis == 0)
+                scene.Sort(BoxXCompare);
+            else if (axis == 1)
+                scene.Sort(BoxYCompare);
+            else
+                scene.Sort(BoxZCompare);
+
+            if (n == 1)
+                m_Left = m_Right = scene[0];
+            else if (n == 2)
+            {
+                m_Left = scene[0];
+                m_Right = scene[1];
+            }
+            else
+            {
+                m_Left = new BVHNode(scene, n / 2, t0, t1);
+
+                var list = new List<Hitable>();
+                for (var i = n / 2; i < scene.Count; i++)
+                    list.Add(scene[i]);
+
+                m_Right = new BVHNode(list, n - n / 2, t0, t1);
+            }
+
+            var left = new AABoundingBox();
+            var right = new AABoundingBox();
+
+            if (!m_Left.BoundingBox(0, 0, ref left) || !m_Right.BoundingBox(0, 0, ref right))
+                throw new System.Exception("No bounding box in bvh_node constructor");
+
+            m_BoundingBox = AABoundingBox.SurroundingBox(ref left, ref right);
         }
 
         public override bool BoundingBox(float t0, float t1, ref AABoundingBox box)
@@ -50,6 +84,48 @@
             }
 
             return false;
+        }
+
+        private int BoxXCompare(Hitable a, Hitable b)
+        {
+            var left = new AABoundingBox();
+            var right = new AABoundingBox();
+
+            if (!a.BoundingBox(0, 0, ref left) || !b.BoundingBox(0, 0, ref right))
+                throw new System.Exception("No bounding box in bvh_node constructor");
+
+            if (left.Min.X - right.Min.X < 0.0f)
+                return -1;
+
+            return 1;
+        }
+
+        private int BoxYCompare(Hitable a, Hitable b)
+        {
+            AABoundingBox left = new AABoundingBox();
+            AABoundingBox right = new AABoundingBox();
+
+            if (!a.BoundingBox(0, 0, ref left) || !b.BoundingBox(0, 0, ref right))
+                throw new System.Exception("No bounding box in bvh_node constructor");
+
+            if (left.Min.Y - right.Min.Y < 0.0f)
+                return -1;
+
+            return 1;
+        }
+
+        private int BoxZCompare(Hitable a, Hitable b)
+        {
+            AABoundingBox left = new AABoundingBox();
+            AABoundingBox right = new AABoundingBox();
+
+            if (!a.BoundingBox(0, 0, ref left) || !b.BoundingBox(0, 0, ref right))
+                throw new System.Exception("No bounding box in bvh_node constructor");
+
+            if (left.Min.Z - right.Min.Z < 0.0f)
+                return -1;
+
+            return 1;
         }
     }
 }

@@ -55,9 +55,15 @@
     <Compile Include="Materials\MetalMaterial.cs" />
     <Compile Include="QuadRenderer.cs" />
     <Compile Include="RayTracer.cs" />
+    <Compile Include="Textures\CheckerTexture.cs" />
+    <Compile Include="Textures\ConstantTexture.cs" />
+    <Compile Include="Textures\ImageTexture.cs" />
+    <Compile Include="Textures\NoiseTexture.cs" />
+    <Compile Include="Textures\Texture.cs" />
     <Compile Include="Utils\ConfigParser.cs" />
     <Compile Include="Utils\Input.cs" />
     <Compile Include="Utils\Mathf.cs" />
+    <Compile Include="Utils\PerlinNoise.cs" />
     <Compile Include="Utils\Random.cs" />
     <Compile Include="RayTracerGame.cs" />
     <Compile Include="Hitable.cs" />
