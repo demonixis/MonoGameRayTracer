@@ -32,8 +32,26 @@ namespace MonoGameRayTracer.Materials
         {
             var target = record.P + record.Normal + Mathf.RandomInUnitySphere();
             scattered = new Ray(record.P, target - record.P);
-            attenuation = m_Texture != null ? m_Texture.Tex2D(0, 0, ref record.P) : m_Albedo;
+
+            if (m_Texture != null)
+            {
+                var u = 0.0f;
+                var v = 0.0f;
+                //GetSphereUV(record.P - new Vector3(1, 1, 1) / 1, record.)
+                attenuation = m_Texture.Tex2D(u, v, ref record.P);
+            }
+            else
+                attenuation = m_Albedo;
+
             return true;
+        }
+
+        private void GetSphereUV(ref Vector3 p, ref float u, ref float v)
+        {
+            var phi = Mathf.Atan2(p.Z, p.Z);
+            var theta = Mathf.Asin(p.Y);
+            u = 1.0f - (phi + MathHelper.Pi) / (2.0f * MathHelper.Pi);
+            v = (theta + MathHelper.PiOver2) / MathHelper.Pi;
         }
     }
 }
