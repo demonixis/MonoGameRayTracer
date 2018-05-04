@@ -56,9 +56,6 @@ namespace MonoGameRayTracer.Textures
             var g = m_Data[3 * i + 3 * m_Width * j + 1] / 255.0f;
             var b = m_Data[3 * i + 3 * m_Width * j + 2] / 255.0f;
 
-            if (r > 0 || g > 0 || b > 0)
-                System.Diagnostics.Debugger.Break();
-
             return new Vector3(r, g, b);
         }
     }

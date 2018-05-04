@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGameRayTracer.Primitives;
 using MonoGameRayTracer.Utils;
 using System.Collections.Generic;
 

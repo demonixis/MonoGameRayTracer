@@ -3,7 +3,7 @@ using MonoGameRayTracer.Materials;
 using MonoGameRayTracer.Utils;
 using System;
 
-namespace MonoGameRayTracer
+namespace MonoGameRayTracer.Primitives
 {
     public class Sphere : Hitable
     {
@@ -18,6 +18,7 @@ namespace MonoGameRayTracer
             m_Center = center;
             m_Radius = radius;
             m_Material = material;
+            m_Material.Hitable = this;
         }
 
         public Sphere(ref Vector3 center, ref float radius, Material material)
@@ -25,6 +26,7 @@ namespace MonoGameRayTracer
             m_Center = center;
             m_Radius = radius;
             m_Material = material;
+            m_Material.Hitable = this;
         }
 
         public override bool Hit(ref Ray ray, float min, float max, ref HitRecord record)
@@ -63,11 +65,20 @@ namespace MonoGameRayTracer
             return false;
         }
 
-        public override bool BoundingBox(float t0, float t1, ref AABoundingBox box)
+        public override bool BoundingBox(float t0, float t1, ref AABB box)
         {
             var bounds = new Vector3(m_Radius);
-            box = new AABoundingBox(m_Center - bounds, m_Center + bounds);
+            box = new AABB(m_Center - bounds, m_Center + bounds);
             return true;
+        }
+
+        public override void GetUV(ref HitRecord record, ref float u, ref float v)
+        {
+            var p = (record.P - m_Center) / m_Radius;
+            var phi = Mathf.Atan2(p.Z, p.X);
+            var theta = Mathf.Asin(p.Y);
+            u = 1.0f - (phi + MathHelper.Pi) / (2.0f * MathHelper.Pi);
+            v = (theta + MathHelper.PiOver2) / MathHelper.Pi;
         }
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGameRayTracer.Materials;
+using MonoGameRayTracer.Primitives;
 using MonoGameRayTracer.Textures;
 using MonoGameRayTracer.Utils;
 using System.Collections.Generic;

@@ -230,7 +230,7 @@ namespace MonoGameRayTracer
             {
                 var scattered = new Ray();
                 var attenuation = Vector3.Zero;
-
+                
                 ret = record.Material.Scatter(ref ray, ref record, ref attenuation, ref scattered);
 
                 if (ret)

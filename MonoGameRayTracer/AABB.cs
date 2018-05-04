@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MonoGameRayTracer
 {
-    public struct AABoundingBox
+    public struct AABB
     {
         private Vector3 m_Minimum;
         private Vector3 m_Maximum;
@@ -15,7 +15,7 @@ namespace MonoGameRayTracer
         public Vector3 Min => m_Minimum;
         public Vector3 Max => m_Maximum;
 
-        public AABoundingBox(Vector3 min, Vector3 max)
+        public AABB(Vector3 min, Vector3 max)
         {
             m_Minimum = min;
             m_Maximum = max;
@@ -53,7 +53,7 @@ namespace MonoGameRayTracer
 
         private float[] VectorToArray(Vector3 vector) => new[] { vector.X, vector.Y, vector.Z };
 
-        public static AABoundingBox SurroundingBox(ref AABoundingBox box0, ref AABoundingBox box1)
+        public static AABB SurroundingBox(ref AABB box0, ref AABB box1)
         {
             Vector3 small = new Vector3(
                 Math.Min(box0.Min.X, box1.Min.X),
@@ -67,7 +67,7 @@ namespace MonoGameRayTracer
                 Math.Min(box0.Max.Z, box1.Max.Z)
             );
 
-            return new AABoundingBox(small, big);
+            return new AABB(small, big);
         }
     }
 }

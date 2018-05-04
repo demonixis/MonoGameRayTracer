@@ -1,8 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-using MonoGameRayTracer.Utils;
-using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace MonoGameRayTracer
 {
@@ -39,12 +35,12 @@ namespace MonoGameRayTracer
             return hitAnything;
         }
 
-        public override bool BoundingBox(float t0, float t1, ref AABoundingBox box)
+        public override bool BoundingBox(float t0, float t1, ref AABB box)
         {
             if (m_List.Count < 1)
                 return false;
 
-            AABoundingBox tmp = new AABoundingBox();
+            AABB tmp = new AABB();
             var first = m_List[0].BoundingBox(t0, t1, ref tmp);
 
             if (!first)
@@ -55,7 +51,7 @@ namespace MonoGameRayTracer
             for (var i = 0; i < m_List.Count; i++)
             {
                 if (m_List[0].BoundingBox(t0, t1, ref tmp))
-                    box = AABoundingBox.SurroundingBox(ref box, ref tmp);
+                    box = AABB.SurroundingBox(ref box, ref tmp);
             }
 
             return true;

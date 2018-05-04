@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 
-namespace MonoGameRayTracer
+namespace MonoGameRayTracer.DataStructure
 {
     public class BVHNode : Hitable
     {
         private Hitable m_Left;
         private Hitable m_Right;
-        private AABoundingBox m_BoundingBox;
+        private AABB m_BoundingBox;
 
         public BVHNode(List<Hitable> scene, int n, float t0, float t1)
         {
@@ -37,16 +37,16 @@ namespace MonoGameRayTracer
                 m_Right = new BVHNode(list, n - n / 2, t0, t1);
             }
 
-            var left = new AABoundingBox();
-            var right = new AABoundingBox();
+            var left = new AABB();
+            var right = new AABB();
 
             if (!m_Left.BoundingBox(0, 0, ref left) || !m_Right.BoundingBox(0, 0, ref right))
                 throw new System.Exception("No bounding box in bvh_node constructor");
 
-            m_BoundingBox = AABoundingBox.SurroundingBox(ref left, ref right);
+            m_BoundingBox = AABB.SurroundingBox(ref left, ref right);
         }
 
-        public override bool BoundingBox(float t0, float t1, ref AABoundingBox box)
+        public override bool BoundingBox(float t0, float t1, ref AABB box)
         {
             box = m_BoundingBox;
             return true;
@@ -88,8 +88,8 @@ namespace MonoGameRayTracer
 
         private int BoxXCompare(Hitable a, Hitable b)
         {
-            var left = new AABoundingBox();
-            var right = new AABoundingBox();
+            var left = new AABB();
+            var right = new AABB();
 
             if (!a.BoundingBox(0, 0, ref left) || !b.BoundingBox(0, 0, ref right))
                 throw new System.Exception("No bounding box in bvh_node constructor");
@@ -102,8 +102,8 @@ namespace MonoGameRayTracer
 
         private int BoxYCompare(Hitable a, Hitable b)
         {
-            AABoundingBox left = new AABoundingBox();
-            AABoundingBox right = new AABoundingBox();
+            AABB left = new AABB();
+            AABB right = new AABB();
 
             if (!a.BoundingBox(0, 0, ref left) || !b.BoundingBox(0, 0, ref right))
                 throw new System.Exception("No bounding box in bvh_node constructor");
@@ -116,8 +116,8 @@ namespace MonoGameRayTracer
 
         private int BoxZCompare(Hitable a, Hitable b)
         {
-            AABoundingBox left = new AABoundingBox();
-            AABoundingBox right = new AABoundingBox();
+            AABB left = new AABB();
+            AABB right = new AABB();
 
             if (!a.BoundingBox(0, 0, ref left) || !b.BoundingBox(0, 0, ref right))
                 throw new System.Exception("No bounding box in bvh_node constructor");
