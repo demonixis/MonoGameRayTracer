@@ -48,6 +48,7 @@
     <Compile Include="AABB.cs" />
     <Compile Include="BVH\BVHNode.cs" />
     <Compile Include="Camera.cs" />
+    <Compile Include="Materials\DiffuseLightMaterial.cs" />
     <Compile Include="Misc\GPURaytracer.cs" />
     <Compile Include="Materials\DieletricMaterial.cs" />
     <Compile Include="Materials\LambertMaterial.cs" />
@@ -55,6 +56,7 @@
     <Compile Include="Materials\MetalMaterial.cs" />
     <Compile Include="Misc\QuadRenderer.cs" />
     <Compile Include="RayTracer.cs" />
+    <Compile Include="SceneFactory.cs" />
     <Compile Include="Textures\CheckerTexture.cs" />
     <Compile Include="Textures\ConstantTexture.cs" />
     <Compile Include="Textures\ImageTexture.cs" />

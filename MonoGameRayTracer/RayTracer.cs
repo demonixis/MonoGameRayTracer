@@ -222,25 +222,26 @@ namespace MonoGameRayTracer
         {
             HitRecord record = new HitRecord();
 
-            var ret = world.Hit(ref ray, 0.001f, float.MaxValue, ref record);
-            var wasInLoop = ret;
+            var hit = world.Hit(ref ray, 0.001f, float.MaxValue, ref record);
+            var wasInLoop = hit;
             var color = Vector3.Zero;
 
-            while (ret == true && depth < m_MaxDepth)
+            while (hit == true && depth < m_MaxDepth)
             {
                 var scattered = new Ray();
                 var attenuation = Vector3.Zero;
-                
-                ret = record.Material.Scatter(ref ray, ref record, ref attenuation, ref scattered);
+                color += record.Material.Emitted(ref record.U, ref record.V, ref record.P);
 
-                if (ret)
+                hit = record.Material.Scatter(ref ray, ref record, ref attenuation, ref scattered);
+
+                if (hit)
                 {
                     if (depth == 0)
-                        color = attenuation;
+                        color += attenuation;
                     else
                         color *= attenuation;
 
-                    ret = world.Hit(ref scattered, 0.001f, float.MaxValue, ref record);
+                    hit = world.Hit(ref scattered, 0.001f, float.MaxValue, ref record);
 
                     depth++;
                 }

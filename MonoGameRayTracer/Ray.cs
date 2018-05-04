@@ -5,6 +5,8 @@ namespace MonoGameRayTracer
 {
     public struct HitRecord
     {
+        public float U;
+        public float V;
         public float T;
         public Vector3 P;
         public Vector3 Normal;

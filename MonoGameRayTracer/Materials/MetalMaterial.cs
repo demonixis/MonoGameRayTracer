@@ -11,8 +11,6 @@ namespace MonoGameRayTracer.Materials
         public Vector3 Albedo => m_Albedo;
         public float Fuzz => m_Fuzz;
 
-        public override Vector4 Value => new Vector4(m_Albedo.X, m_Albedo.Y, m_Albedo.Z, 1);
-
         public MetalMaterial(float x, float y, float z, float fuzz)
         {
             m_Albedo = new Vector3(x, y, z);

@@ -1,11 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using MonoGameRayTracer.Materials;
-using MonoGameRayTracer.Primitives;
-using MonoGameRayTracer.Textures;
 using MonoGameRayTracer.Utils;
-using System.Collections.Generic;
 using System.IO;
 
 namespace MonoGameRayTracer
@@ -23,6 +19,7 @@ namespace MonoGameRayTracer
         private RayTracer m_Raytracer;
         private bool m_ShowUI = true;
         private bool m_Realtime = false;
+        private bool m_DisableMouse = true;
 
         public RayTracerGame()
         {
@@ -36,7 +33,7 @@ namespace MonoGameRayTracer
         {
             var width = 640;
             var height = 480;
-            var scale = 0.75f;
+            var scale = 1f;
             var rayStep = 1;
             var sceneComplexity = 1;
 
@@ -59,42 +56,13 @@ namespace MonoGameRayTracer
             m_SpriteBatch = new SpriteBatch(GraphicsDevice);
             m_SpriteFont = Content.Load<SpriteFont>("Default");
 
-            // Prepare the scene.
-            var list = new List<Hitable>();
-            list.Add(new Sphere(new Vector3(0, -1000, 0), 1000, new LambertMaterial(new CheckerTexture())));
-
-            var temp = new Vector3(4, 0.2f, 0);
-
-            for (var a = -sceneComplexity; a < sceneComplexity; a++)
-            {
-                for (var b = -sceneComplexity; b < sceneComplexity; b++)
-                {
-                    var chooseMat = Random.Value;
-                    var center = new Vector3(a + 0.9f + Random.Value, 0.2f, b + 0.9f + Random.Value);
-
-                    if ((center - temp).Length() > 0.9f)
-                    {
-                        if (chooseMat < 0.8f)
-                            list.Add(new Sphere(center, 0.2f, new LambertMaterial(Random.Vector3Twice)));
-                        else if (chooseMat < 0.95f)
-                            list.Add(new Sphere(center, 0.2f, new MetalMaterial(0.5f * (1 + Random.Value), 0.5f * (1 + Random.Value), 0.5f * (1 + Random.Value), 0.5f * Random.Value)));
-                        else
-                            list.Add(new Sphere(center, 0.2f, new DieletricMaterial(1.5f)));
-                    }
-                }
-            }
-
-            var earthTexture = Content.Load<Texture2D>("earth");
-
-            list.Add(new Sphere(new Vector3(0, 1, 0), 1, new LambertMaterial(new ImageTexture(earthTexture))));
-            list.Add(new Sphere(new Vector3(-4, 1, 0), 1, new LambertMaterial(new NoiseTexture())));
-            list.Add(new Sphere(new Vector3(4, 1, 0), 1, new MetalMaterial(0.7f, 0.6f, 0.5f, 0.0f)));
-
             // Final setup.
             var aspect = (float)m_GraphicsDeviceManager.PreferredBackBufferWidth / (float)m_GraphicsDeviceManager.PreferredBackBufferHeight;
 
+            var scene = SceneFactory.MakeSphereScene(Content, sceneComplexity);
+
             m_Camera = new Camera(new Vector3(0, 0.5f, 4.5f), new Vector3(-0.22f, 0.15f, 0.0f), Vector3.Up, 75.0f, aspect);
-            m_World = new HitableList(list);
+            m_World = new HitableList(scene);
 
             m_Raytracer = new RayTracer(this, scale);
             m_Raytracer.Step = rayStep;
@@ -123,8 +91,11 @@ namespace MonoGameRayTracer
             if (m_Input.GetKeyDown(Keys.PageDown))
                 m_Raytracer.Step--;
 
-            if (m_Input.GetKeyDown(Keys.F12) && !m_Realtime)
-                m_Raytracer.Render(m_Camera, m_World);
+            if (m_Input.GetKeyDown(Keys.F9))
+                m_DisableMouse = !m_DisableMouse;
+
+            if (m_Input.GetKeyDown(Keys.F10))
+                m_ShowUI = !m_ShowUI;
 
             if (m_Input.GetKeyDown(Keys.F11))
             {
@@ -135,8 +106,8 @@ namespace MonoGameRayTracer
                     m_Raytracer.StopRenderLoop();
             }
 
-            if (m_Input.GetKeyDown(Keys.F10))
-                m_ShowUI = !m_ShowUI;
+            if (m_Input.GetKeyDown(Keys.F12) && !m_Realtime)
+                m_Raytracer.Render(m_Camera, m_World);
 
             var upScale = m_Input.GetKeyDown(Keys.Insert);
             var downScale = m_Input.GetKeyDown(Keys.Delete);
@@ -154,7 +125,7 @@ namespace MonoGameRayTracer
                 }
             }
 
-            if (m_Input.GetKeyDown(Keys.S) && m_Input.GetKey(Keys.LeftControl))
+            if (m_Input.GetKey(Keys.LeftControl) && m_Input.GetKeyDown(Keys.S))
             {
                 var pp = GraphicsDevice.PresentationParameters;
 
@@ -186,7 +157,8 @@ namespace MonoGameRayTracer
                 else if (m_Input.GetKey(Keys.A))
                     m_Camera.Move(0.0f, -moveSpeed, 0.0f);
 
-                m_Camera.Rotate(rotationSpeed * m_Input.Vertical, rotationSpeed * m_Input.Horizontal, 0.0f);
+                if (!m_DisableMouse)
+                    m_Camera.Rotate(rotationSpeed * m_Input.Vertical, rotationSpeed * m_Input.Horizontal, 0.0f);
             }
 
             base.Update(gameTime);

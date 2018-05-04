@@ -49,7 +49,7 @@ namespace MonoGameRayTracer
                     var sphere = (Sphere)world[i];
                     data.Add(new Color(sphere.Center.X, sphere.Center.Y, sphere.Center.Z, 1));
                     data.Add(new Color(sphere.Radius, 0, 0, 0));
-                    data.Add(new Color(sphere.Material.Value));
+                    //data.Add(new Color(sphere.Material.Value));
                 }
             }
 
