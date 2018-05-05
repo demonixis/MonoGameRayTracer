@@ -10,6 +10,7 @@ namespace MonoGameRayTracer.Primitives
     {
         private Vector3 m_Center;
         private float m_Radius;
+        private float m_Radius2;
 
         public Vector3 Center => m_Center;
         public float Radius => m_Radius;
@@ -20,6 +21,7 @@ namespace MonoGameRayTracer.Primitives
             m_Radius = radius;
             m_Material = material;
             m_Material.Hitable = this;
+            m_Radius2 = radius * radius;
         }
 
         public Sphere(ref Vector3 center, ref float radius, Material material)
@@ -28,6 +30,7 @@ namespace MonoGameRayTracer.Primitives
             m_Radius = radius;
             m_Material = material;
             m_Material.Hitable = this;
+            m_Radius2 = radius * radius;
         }
 
         public override bool Hit(ref Ray ray, float min, float max, ref HitRecord record)
@@ -36,7 +39,7 @@ namespace MonoGameRayTracer.Primitives
             var oc = ray.Origin - m_Center;
             var a = Vector3.Dot(rayDirection, rayDirection);
             var b = Vector3.Dot(oc, rayDirection);
-            var c = Vector3.Dot(oc, oc) - m_Radius * m_Radius;
+            var c = Vector3.Dot(oc, oc) - m_Radius2;
             var disciminent = b * b - a * c;
 
             if (disciminent > 0)
