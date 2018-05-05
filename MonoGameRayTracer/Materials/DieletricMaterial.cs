@@ -1,5 +1,5 @@
-﻿using Microsoft.Xna.Framework;
-using MonoGameRayTracer.Utils;
+﻿using MonoGameRayTracer.Utils;
+using System.Numerics;
 
 namespace MonoGameRayTracer.Materials
 {

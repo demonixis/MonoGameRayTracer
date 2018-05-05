@@ -1,4 +1,4 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Numerics;
 using MonoGameRayTracer.Utils;
 
 namespace MonoGameRayTracer.Materials

@@ -1,38 +1,46 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using MonoGameRayTracer.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using System.Numerics;
+
+using XnaRect = Microsoft.Xna.Framework.Rectangle;
+using XnaColor = Microsoft.Xna.Framework.Color;
+using XnaGame = Microsoft.Xna.Framework.Game;
+using XnaGameTime = Microsoft.Xna.Framework.GameTime;
+using XnaComponent = Microsoft.Xna.Framework.DrawableGameComponent;
+using XnaVec2 = Microsoft.Xna.Framework.Vector2;
+using XnaVec3 = Microsoft.Xna.Framework.Vector3;
 
 namespace MonoGameRayTracer
 {
     public class SubRect
     {
-        public Rectangle Rect { get; private set; }
-        public Color[] Buffer { get; private set; }
+        public XnaRect Rect { get; private set; }
+        public XnaColor[] Buffer { get; private set; }
 
         public SubRect(int x, int y, int width, int height, int slice)
         {
             var xMin = width / slice * x;
             var yMin = height / slice * y;
 
-            Rect = new Rectangle(xMin, yMin, width / slice, height / slice);
-            Buffer = new Color[width / slice * height / slice];
+            Rect = new XnaRect(xMin, yMin, width / slice, height / slice);
+            Buffer = new XnaColor[width / slice * height / slice];
         }
 
         public override string ToString() => Rect.ToString();
     }
 
-    public class RayTracer : DrawableGameComponent
+    public class RayTracer : XnaComponent
     {
         private Texture2D m_backBufferTexture;
-        private Color[] m_BackBuffer;
+        private XnaColor[] m_BackBuffer;
         private List<Thread> m_Threads;
         private Stopwatch m_Stopwatch;
         private SubRect[] m_subRects;
-        private Rectangle m_DrawRectangle;
+        private XnaRect m_DrawXnaRect;
         private SpriteBatch m_SpriteBatch;
         private int m_RenderWidth;
         private int m_RenderHeight;
@@ -61,7 +69,7 @@ namespace MonoGameRayTracer
 
         public Texture2D Texture => m_backBufferTexture;
 
-        public RayTracer(Game game, float scale)
+        public RayTracer(XnaGame game, float scale)
             : base (game)
         {
             m_Stopwatch = new Stopwatch();
@@ -86,12 +94,12 @@ namespace MonoGameRayTracer
             }
         }
 
-        public override void Draw(GameTime gameTime)
+        public override void Draw(XnaGameTime gameTime)
         {
             base.Draw(gameTime);
 
             m_SpriteBatch.Begin();
-            m_SpriteBatch.Draw(m_backBufferTexture, m_DrawRectangle, null, Color.White, 0, Vector2.Zero, SpriteEffects.FlipVertically, 0);
+            m_SpriteBatch.Draw(m_backBufferTexture, m_DrawXnaRect, null, XnaColor.White, 0, XnaVec2.Zero, SpriteEffects.FlipVertically, 0);
             m_SpriteBatch.End();
         }
 
@@ -116,13 +124,13 @@ namespace MonoGameRayTracer
                 m_backBufferTexture.Dispose();
 
             m_backBufferTexture = new Texture2D(device, m_RenderWidth, m_RenderHeight, false, SurfaceFormat.Color);
-            m_BackBuffer = new Color[m_RenderWidth * m_RenderHeight];
+            m_BackBuffer = new XnaColor[m_RenderWidth * m_RenderHeight];
 
             for (var y = 0; y < m_nbSlicePixels; y++)
                 for (var x = 0; x < m_nbSlicePixels; x++)
                     m_subRects[x + y * m_nbSlicePixels] = new SubRect(x, y, m_RenderWidth, m_RenderHeight, m_nbSlicePixels);
 
-            m_DrawRectangle = new Rectangle(0, 0, screenWidth, screenHeight);
+            m_DrawXnaRect = new XnaRect(0, 0, screenWidth, screenHeight);
 
             return true;
         }
@@ -188,9 +196,9 @@ namespace MonoGameRayTracer
 
 #endregion
 
-        private Vector3 GetColorRecursive(Ray ray, Hitable world, int depth) => GetColorRecursive(ref ray, world, depth);
+        private Vector3 GetXnaColorRecursive(Ray ray, Hitable world, int depth) => GetXnaColorRecursive(ref ray, world, depth);
 
-        private Vector3 GetColorRecursive(ref Ray ray, Hitable world, int depth)
+        private Vector3 GetXnaColorRecursive(ref Ray ray, Hitable world, int depth)
         {
             HitRecord record = new HitRecord();
             if (world.Hit(ref ray, 0.001f, float.MaxValue, ref record))
@@ -201,14 +209,14 @@ namespace MonoGameRayTracer
                 if (record.Material != null)
                 {
                     if (depth < m_MaxDepth && record.Material.Scatter(ref ray, ref record, ref attenuation, ref scattered))
-                        return attenuation* GetColor(ref scattered, world, depth + 1);
+                        return attenuation* GetXnaColor(ref scattered, world, depth + 1);
                     else
                         return Vector3.Zero;
                 }
 
                 var target = record.P + record.Normal + Mathf.RandomInUnitySphere();
                 var nRay = new Ray(record.P, target - record.P);
-                return 0.5f * GetColor(ref nRay, world, depth);
+                return 0.5f * GetXnaColor(ref nRay, world, depth);
             }
 
             // Background color.
@@ -217,9 +225,9 @@ namespace MonoGameRayTracer
             return (1.0f - t) * Vector3.One + t * new Vector3(0.5f, 0.7f, 1.0f);
         }
 
-       // private Vector3 GetColor(Ray ray, Hitable world, int depth) => GetColor(ref ray, world, depth);
+       // private Vector3 GetXnaColor(Ray ray, Hitable world, int depth) => GetXnaColor(ref ray, world, depth);
 
-        private Vector3 GetColor(ref Ray ray, Hitable world, int depth)
+        private Vector3 GetXnaColor(ref Ray ray, Hitable world, int depth)
         {
             HitRecord record = new HitRecord();
 
@@ -265,7 +273,7 @@ namespace MonoGameRayTracer
                 for (var i = 0; i < m_RenderWidth; i++)
                     UpdatePixel(ref i, ref j, camera, world);
 
-            m_backBufferTexture.SetData<Color>(m_BackBuffer);
+            m_backBufferTexture.SetData<XnaColor>(m_BackBuffer);
 
             m_Stopwatch.Stop();
             m_LastFrameTime = m_Stopwatch.ElapsedMilliseconds;
@@ -280,7 +288,7 @@ namespace MonoGameRayTracer
                 var u = (float)(i + Random.Value) / m_RenderWidth;
                 var v = (float)(j + Random.Value) / m_RenderHeight;
                 var ray = camera.GetRay(ref u, ref v);
-                color += GetColor(ref ray, world, 0);
+                color += GetXnaColor(ref ray, world, 0);
             }
 
             color /= (float)m_Step;
@@ -288,7 +296,7 @@ namespace MonoGameRayTracer
             color.Y = Mathf.Sqrt(color.Y);
             color.Z = Mathf.Sqrt(color.Z);
 
-            m_BackBuffer[i + j * m_RenderWidth] = new Color(color.X, color.Y, color.Z);
+            m_BackBuffer[i + j * m_RenderWidth] = new XnaColor(color.X, color.Y, color.Z);
         }
 
         private void RenderMT(Camera camera, Hitable world, SubRect subRect)
@@ -300,7 +308,7 @@ namespace MonoGameRayTracer
                 for (var i = 0; i < subRect.Rect.Width; i++)
                     UpdatePixelMT(ref i, ref j, camera, world, subRect);
 
-            m_backBufferTexture.SetData<Color>(0, new Rectangle(subRect.Rect.X, subRect.Rect.Y, subRect.Rect.Width, subRect.Rect.Height), subRect.Buffer, 0, subRect.Buffer.Length);
+            m_backBufferTexture.SetData<XnaColor>(0, new XnaRect(subRect.Rect.X, subRect.Rect.Y, subRect.Rect.Width, subRect.Rect.Height), subRect.Buffer, 0, subRect.Buffer.Length);
 
             if (subRect.Rect.X == 0 && subRect.Rect.Y == 0)
             {
@@ -320,7 +328,7 @@ namespace MonoGameRayTracer
                 var u = (float)(x + Random.Value) / m_RenderWidth;
                 var v = (float)(y + Random.Value) / m_RenderHeight;
                 var ray = camera.GetRay(ref u, ref v);
-                color += GetColor(ref ray, world, 0);
+                color += GetXnaColor(ref ray, world, 0);
             }
 
             color /= (float)m_Step;
@@ -328,7 +336,7 @@ namespace MonoGameRayTracer
             color.Y = Mathf.Sqrt(color.Y);
             color.Z = Mathf.Sqrt(color.Z);
 
-            subRect.Buffer[i + j * subRect.Rect.Width] = new Color(color.X, color.Y, color.Z);
+            subRect.Buffer[i + j * subRect.Rect.Width] = new XnaColor(color.X, color.Y, color.Z);
         }
     }
 }

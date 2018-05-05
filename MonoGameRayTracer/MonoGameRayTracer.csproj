@@ -69,12 +69,10 @@
     <Compile Include="BVH\BVHNode.cs" />
     <Compile Include="Camera.cs" />
     <Compile Include="Materials\DiffuseLightMaterial.cs" />
-    <Compile Include="Misc\GPURaytracer.cs" />
     <Compile Include="Materials\DieletricMaterial.cs" />
     <Compile Include="Materials\LambertMaterial.cs" />
     <Compile Include="Materials\Material.cs" />
     <Compile Include="Materials\MetalMaterial.cs" />
-    <Compile Include="Misc\QuadRenderer.cs" />
     <Compile Include="RayTracer.cs" />
     <Compile Include="SceneFactory.cs" />
     <Compile Include="Textures\CheckerTexture.cs" />
@@ -104,6 +102,10 @@
       <HintPath>..\packages\PcgRandom.1.1.0\lib\net40\PcgRandom.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.4.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>

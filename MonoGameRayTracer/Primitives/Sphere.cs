@@ -1,8 +1,7 @@
-﻿using Microsoft.Xna.Framework;
-using MonoGameRayTracer.DataStructure;
+﻿using MonoGameRayTracer.DataStructure;
 using MonoGameRayTracer.Materials;
 using MonoGameRayTracer.Utils;
-using System;
+using System.Numerics;
 
 namespace MonoGameRayTracer.Primitives
 {
@@ -88,8 +87,8 @@ namespace MonoGameRayTracer.Primitives
             var p = (record.P - m_Center) / m_Radius;
             var phi = Mathf.Atan2(p.Z, p.X);
             var theta = Mathf.Asin(p.Y);
-            record.U = 1.0f - (phi + MathHelper.Pi) / (2.0f * MathHelper.Pi);
-            record.V = (theta + MathHelper.Pi / 2.0f) / MathHelper.Pi;
+            record.U = 1.0f - (phi + Microsoft.Xna.Framework.MathHelper.Pi) / (2.0f * Microsoft.Xna.Framework.MathHelper.Pi);
+            record.V = (theta + Microsoft.Xna.Framework.MathHelper.Pi / 2.0f) / Microsoft.Xna.Framework.MathHelper.Pi;
         }
     }
 }

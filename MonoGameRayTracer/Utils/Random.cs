@@ -1,7 +1,9 @@
-﻿using Microsoft.Xna.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Numerics;
+
+using XnaColor = Microsoft.Xna.Framework.Color;
 
 namespace MonoGameRayTracer
 {
@@ -26,6 +28,6 @@ namespace MonoGameRayTracer
         public static float Value => (float)SafeRandom.NextDouble();
         public static Vector3 Vector3 => new Vector3(Value, Value, Value);
         public static Vector3 Vector3Twice => new Vector3(Value * Value, Value * Value, Value * Value);
-        public static Color Color => new Color(Value, Value, Value);
+        public static XnaColor Color => new XnaColor(Value, Value, Value);
     }
 }

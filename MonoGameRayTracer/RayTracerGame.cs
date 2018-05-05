@@ -4,6 +4,8 @@ using Microsoft.Xna.Framework.Input;
 using MonoGameRayTracer.Utils;
 using System.IO;
 
+using float3 = System.Numerics.Vector3;
+
 namespace MonoGameRayTracer
 {
     public class RayTracerGame : Game
@@ -61,7 +63,7 @@ namespace MonoGameRayTracer
 
             var scene = SceneFactory.MakeSphereScene(Content, sceneComplexity);
 
-            m_Camera = new Camera(new Vector3(0, 0.5f, 4.5f), new Vector3(-0.22f, 0.15f, 0.0f), Vector3.Up, 75.0f, aspect);
+            m_Camera = new Camera(new float3(0, 0.5f, 4.5f), new float3(-0.22f, 0.15f, 0.0f), new float3(0, 1, 0), 75.0f, aspect);
             m_World = new HitableList(scene);
 
             m_Raytracer = new RayTracer(this, scale);

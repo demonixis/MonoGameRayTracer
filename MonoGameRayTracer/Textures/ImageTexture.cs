@@ -1,9 +1,10 @@
-﻿using Microsoft.Xna.Framework;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Numerics;
 
 namespace MonoGameRayTracer.Textures
 {
-    using MGTexture = Microsoft.Xna.Framework.Graphics.Texture2D;
+    using XnaColor = Microsoft.Xna.Framework.Color;
+    using XnaTexture = Microsoft.Xna.Framework.Graphics.Texture2D;
 
     public class ImageTexture : Texture
     {
@@ -11,10 +12,10 @@ namespace MonoGameRayTracer.Textures
         private int m_Width;
         public int m_Height;
 
-        public ImageTexture(MGTexture texture)
+        public ImageTexture(XnaTexture texture)
         {
-            var data = new Color[texture.Width * texture.Height];
-            texture.GetData<Color>(data);
+            var data = new XnaColor[texture.Width * texture.Height];
+            texture.GetData<XnaColor>(data);
 
             var list = new List<byte>();
             for (var i = 0; i < texture.Width * texture.Height; i++)

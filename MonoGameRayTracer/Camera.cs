@@ -1,6 +1,5 @@
-﻿using Microsoft.Xna.Framework;
-using MonoGameRayTracer.Utils;
-using System;
+﻿using MonoGameRayTracer.Utils;
+using System.Numerics;
 
 namespace MonoGameRayTracer
 {
@@ -21,15 +20,15 @@ namespace MonoGameRayTracer
         public Vector3 Horizontal => m_Horizontal;
         public Vector3 Vertical => m_Vertical;
 
-        private Matrix m_RotationMatrix;
+        private Matrix4x4 m_RotationMatrix;
 
         public Camera()
         {
             m_Origin = new Vector3(0.0f, 0.0f, 0.0f);
-            m_RotationMatrix = Matrix.CreateFromYawPitchRoll(m_Rotation.Y, m_Rotation.X, m_Rotation.Z);
-            m_LookAt = m_Origin + Vector3.Transform(Vector3.Forward, m_RotationMatrix);
-            m_UpVector = Vector3.Up;
-            m_FieldOfView = 75.0f * MathHelper.Pi / 180.0f;
+            m_RotationMatrix = Matrix4x4.CreateFromYawPitchRoll(m_Rotation.Y, m_Rotation.X, m_Rotation.Z);
+            m_LookAt = m_Origin + Vector3.Transform(new Vector3(0, 0, -1), m_RotationMatrix);
+            m_UpVector = new Vector3(0, 1, 0);
+            m_FieldOfView = 75.0f * Microsoft.Xna.Framework.MathHelper.Pi / 180.0f;
             m_Aspect = (float)640 / (float)480;
 
             ComputeMatrix();
@@ -38,8 +37,8 @@ namespace MonoGameRayTracer
         public Camera(Vector3 origin, Vector3 rotation, Vector3 upVector, float fov, float aspect)
         {
             m_Origin = origin;
-            m_RotationMatrix = Matrix.CreateFromYawPitchRoll(m_Rotation.Y, m_Rotation.X, m_Rotation.Z);
-            m_LookAt = m_Origin + Vector3.Transform(Vector3.Forward, m_RotationMatrix);
+            m_RotationMatrix = Matrix4x4.CreateFromYawPitchRoll(m_Rotation.Y, m_Rotation.X, m_Rotation.Z);
+            m_LookAt = m_Origin + Vector3.Transform(new Vector3(0, 0, -1), m_RotationMatrix);
             m_UpVector = upVector;
             m_FieldOfView = fov;
             m_Aspect = aspect;
@@ -49,7 +48,7 @@ namespace MonoGameRayTracer
 
         private void ComputeMatrix()
         {
-            var theta = m_FieldOfView * MathHelper.Pi / 180.0f;
+            var theta = m_FieldOfView * Microsoft.Xna.Framework.MathHelper.Pi / 180.0f;
             var halfHeight = Mathf.Tan(theta / 2.0f);
             var halfWidth = m_Aspect * halfHeight;
 
@@ -75,7 +74,7 @@ namespace MonoGameRayTracer
             m_Origin.Z += z;
 
             m_Origin += Vector3.Transform(new Vector3(x, y, z), m_RotationMatrix);
-            m_LookAt = m_Origin + Vector3.Transform(Vector3.Forward, m_RotationMatrix);
+            m_LookAt = m_Origin + Vector3.Transform(new Vector3(0, 0, -1), m_RotationMatrix);
 
             ComputeMatrix();
         }
@@ -85,9 +84,9 @@ namespace MonoGameRayTracer
             m_Rotation.X += x;
             m_Rotation.Y += y;
             m_Rotation.Z += z;
-            m_RotationMatrix = Matrix.CreateFromYawPitchRoll(m_Rotation.Y, m_Rotation.X, m_Rotation.Z);
+            m_RotationMatrix = Matrix4x4.CreateFromYawPitchRoll(m_Rotation.Y, m_Rotation.X, m_Rotation.Z);
 
-            m_LookAt = m_Origin + Vector3.Transform(Vector3.Forward, m_RotationMatrix);
+            m_LookAt = m_Origin + Vector3.Transform(new Vector3(0, 0, -1), m_RotationMatrix);
 
             ComputeMatrix();
         }

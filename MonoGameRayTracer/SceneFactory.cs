@@ -1,10 +1,10 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
+﻿using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGameRayTracer.Materials;
 using MonoGameRayTracer.Primitives;
 using MonoGameRayTracer.Textures;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace MonoGameRayTracer
 {
