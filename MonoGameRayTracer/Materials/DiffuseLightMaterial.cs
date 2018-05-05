@@ -15,6 +15,6 @@ namespace MonoGameRayTracer.Materials
 
         public override bool Scatter(ref Ray ray, ref HitRecord record, ref Vector3 attenuation, ref Ray scattered) => false;
 
-        public override Vector3 Emitted(ref float u, ref float v, ref Vector3 p) => m_EmissiveTexture.Tex2D(u, v, ref p);
+        public override Vector3 Emitted(ref float u, ref float v, ref Vector3 p) => m_EmissiveTexture.Tex2D(ref u, ref v, ref p);
     }
 }

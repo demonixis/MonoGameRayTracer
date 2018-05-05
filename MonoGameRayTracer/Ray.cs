@@ -33,5 +33,11 @@ namespace MonoGameRayTracer
             m_Origin = origin;
             m_Direction = direction;
         }
+
+        public void Set(ref Vector3 origin, ref Vector3 direction)
+        {
+            m_Origin = origin;
+            m_Direction = direction;
+        }
     }
 }

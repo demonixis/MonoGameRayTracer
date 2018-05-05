@@ -29,10 +29,11 @@ namespace MonoGameRayTracer.Materials
         public override bool Scatter(ref Ray ray, ref HitRecord record, ref Vector3 attenuation, ref Ray scattered)
         {
             var target = record.P + record.Normal + Mathf.RandomInUnitySphere();
-            scattered = new Ray(record.P, target - record.P);
+            var direction = target - record.P;
+            scattered.Set(ref record.P, ref direction);
 
             if (m_Texture != null)
-                attenuation = m_Texture.Tex2D(record.U, record.V, ref record.P);
+                attenuation = m_Texture.Tex2D(ref record.U, ref record.V, ref record.P);
             else
                 attenuation = m_Albedo;
 

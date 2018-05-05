@@ -32,9 +32,10 @@ namespace MonoGameRayTracer.Primitives
 
         public override bool Hit(ref Ray ray, float min, float max, ref HitRecord record)
         {
+            var rayDirection = ray.Direction;
             var oc = ray.Origin - m_Center;
-            var a = Vector3.Dot(ray.Direction, ray.Direction);
-            var b = Vector3.Dot(oc, ray.Direction);
+            var a = Vector3.Dot(rayDirection, rayDirection);
+            var b = Vector3.Dot(oc, rayDirection);
             var c = Vector3.Dot(oc, oc) - m_Radius * m_Radius;
             var disciminent = b * b - a * c;
 

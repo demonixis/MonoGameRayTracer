@@ -4,6 +4,7 @@ using System.Collections.Generic;
 namespace MonoGameRayTracer.Textures
 {
     using MGTexture = Microsoft.Xna.Framework.Graphics.Texture2D;
+
     public class ImageTexture : Texture
     {
         private byte[] m_Data;
@@ -35,7 +36,7 @@ namespace MonoGameRayTracer.Textures
             m_Height = height;
         }
 
-        public override Vector3 Tex2D(float u, float v, ref Vector3 vector)
+        public override Vector3 Tex2D(ref float u, ref float v, ref Vector3 vector)
         {
             var i = (int)(u * m_Width);
             var j = (int)((1 - v) * m_Height - 0.001f);
@@ -51,12 +52,34 @@ namespace MonoGameRayTracer.Textures
 
             if (j > m_Height - 1)
                 j = m_Height - 1;
-            
+
             var r = m_Data[3 * i + 3 * m_Width * j] / 255.0f;
             var g = m_Data[3 * i + 3 * m_Width * j + 1] / 255.0f;
             var b = m_Data[3 * i + 3 * m_Width * j + 2] / 255.0f;
 
             return new Vector3(r, g, b);
+        }
+
+        public override void Tex2D(ref HitRecord record, ref Vector3 result)
+        {
+            var i = (int)(record.U * m_Width);
+            var j = (int)((1 - record.V) * m_Height - 0.001f);
+
+            if (i < 0)
+                i = 0;
+
+            if (j < 0)
+                j = 0;
+
+            if (i > m_Width - 1)
+                i = m_Width - 1;
+
+            if (j > m_Height - 1)
+                j = m_Height - 1;
+
+            result.X = m_Data[3 * i + 3 * m_Width * j] / 255.0f;
+            result.Y = m_Data[3 * i + 3 * m_Width * j + 1] / 255.0f;
+            result.Z = m_Data[3 * i + 3 * m_Width * j + 2] / 255.0f;
         }
     }
 }

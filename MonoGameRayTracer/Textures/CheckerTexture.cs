@@ -20,14 +20,25 @@ namespace MonoGameRayTracer.Textures
             m_EvenTexture = even;
         }
 
-        public override Vector3 Tex2D(float u, float v, ref Vector3 vector)
+        public override Vector3 Tex2D(ref float u, ref float v, ref Vector3 vector)
         {
             var sines = Mathf.Sin(10.0f * vector.X) * Mathf.Sin(10.0f * vector.Y) * Mathf.Sin(10.0f * vector.Z);
 
             if (sines < 0)
-                return m_OddTexture.Tex2D(u, v, ref vector);
+                return m_OddTexture.Tex2D(ref u, ref v, ref vector);
 
-            return m_EvenTexture.Tex2D(u, v, ref vector);
+            return m_EvenTexture.Tex2D(ref u, ref v, ref vector);
+        }
+
+        public override void Tex2D(ref HitRecord record, ref Vector3 result)
+        {
+            var vector = record.P;
+            var sines = Mathf.Sin(10.0f * vector.X) * Mathf.Sin(10.0f * vector.Y) * Mathf.Sin(10.0f * vector.Z);
+
+            if (sines < 0)
+                result = m_OddTexture.Tex2D(ref record.U, ref record.V, ref vector);
+
+            result = m_EvenTexture.Tex2D(ref record.U, ref record.V, ref vector);
         }
     }
 }

@@ -14,8 +14,9 @@ namespace MonoGameRayTracer.Materials
 
         public override bool Scatter(ref Ray ray, ref HitRecord record, ref Vector3 attenuation, ref Ray scattered)
         {
+            var rayDirection = ray.Direction;
             var outwardNormal = Vector3.Zero;
-            var reflected = Vector3.Reflect(ray.Direction, record.Normal);
+            var reflected = Vector3.Reflect(rayDirection, record.Normal);
             var niOverNt = 0.0f;
 
             attenuation = new Vector3(1.0f, 1.0f, 0.0f);
@@ -23,20 +24,20 @@ namespace MonoGameRayTracer.Materials
             var reflectProbe = 0.0f;
             var cosine = 0.0f;
 
-            if (Vector3.Dot(ray.Direction, record.Normal) > 0)
+            if (Vector3.Dot(rayDirection, record.Normal) > 0)
             {
                 outwardNormal = -record.Normal;
                 niOverNt = m_RefIdx;
-                cosine = m_RefIdx * Vector3.Dot(ray.Direction, record.Normal) / ray.Direction.Length();
+                cosine = m_RefIdx * Vector3.Dot(rayDirection, record.Normal) / rayDirection.Length();
             }
             else
             {
                 outwardNormal = record.Normal;
                 niOverNt = 1.0f / m_RefIdx;
-                cosine = -Vector3.Dot(ray.Direction, record.Normal) / ray.Direction.Length();
+                cosine = -Vector3.Dot(rayDirection, record.Normal) / rayDirection.Length();
             }
 
-            var direction = ray.Direction;
+            var direction = rayDirection;
             if (Mathf.Refract(ref direction, ref outwardNormal, niOverNt, ref refracted))
             {
                 reflectProbe = Mathf.Schlick(cosine, m_RefIdx);

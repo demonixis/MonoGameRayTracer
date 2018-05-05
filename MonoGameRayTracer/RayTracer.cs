@@ -207,7 +207,8 @@ namespace MonoGameRayTracer
                 }
 
                 var target = record.P + record.Normal + Mathf.RandomInUnitySphere();
-                return 0.5f * GetColor(new Ray(record.P, target - record.P), world, depth);
+                var nRay = new Ray(record.P, target - record.P);
+                return 0.5f * GetColor(ref nRay, world, depth);
             }
 
             // Background color.
@@ -216,7 +217,7 @@ namespace MonoGameRayTracer
             return (1.0f - t) * Vector3.One + t * new Vector3(0.5f, 0.7f, 1.0f);
         }
 
-        private Vector3 GetColor(Ray ray, Hitable world, int depth) => GetColor(ref ray, world, depth);
+       // private Vector3 GetColor(Ray ray, Hitable world, int depth) => GetColor(ref ray, world, depth);
 
         private Vector3 GetColor(ref Ray ray, Hitable world, int depth)
         {
@@ -225,11 +226,11 @@ namespace MonoGameRayTracer
             var hit = world.Hit(ref ray, 0.001f, float.MaxValue, ref record);
             var wasInLoop = hit;
             var color = Vector3.Zero;
+            var scattered = new Ray();
+            var attenuation = Vector3.Zero;
 
-            while (hit == true && depth < m_MaxDepth)
+            while (hit && depth < m_MaxDepth)
             {
-                var scattered = new Ray();
-                var attenuation = Vector3.Zero;
                 color += record.Material.Emitted(ref record.U, ref record.V, ref record.P);
 
                 hit = record.Material.Scatter(ref ray, ref record, ref attenuation, ref scattered);

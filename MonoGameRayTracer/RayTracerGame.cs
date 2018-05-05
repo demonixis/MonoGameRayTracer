@@ -18,7 +18,7 @@ namespace MonoGameRayTracer
         private Vector2[] m_StringPositions;
         private RayTracer m_Raytracer;
         private bool m_ShowUI = true;
-        private bool m_Realtime = false;
+        private bool m_Realtime = true;
         private bool m_DisableMouse = true;
 
         public RayTracerGame()
