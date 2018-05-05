@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using MonoGameRayTracer.DataStructure;
+using System.Collections.Generic;
 
 namespace MonoGameRayTracer
 {

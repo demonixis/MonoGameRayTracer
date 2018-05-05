@@ -1,4 +1,5 @@
-﻿using MonoGameRayTracer.Materials;
+﻿using MonoGameRayTracer.DataStructure;
+using MonoGameRayTracer.Materials;
 
 namespace MonoGameRayTracer
 {
@@ -10,7 +11,5 @@ namespace MonoGameRayTracer
 
         public abstract bool Hit(ref Ray ray, float min, float max, ref HitRecord record);
         public abstract bool BoundingBox(float t0, float t1, ref AABB box);
-
-        public virtual void GetUV(ref HitRecord record, ref float u, ref float v) { }
     }
 }

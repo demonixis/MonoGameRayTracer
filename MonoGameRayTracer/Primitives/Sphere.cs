@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using MonoGameRayTracer.DataStructure;
 using MonoGameRayTracer.Materials;
 using MonoGameRayTracer.Utils;
 using System;
@@ -47,6 +48,9 @@ namespace MonoGameRayTracer.Primitives
                     record.P = ray.PointAtParameter(record.T);
                     record.Normal = (record.P - m_Center) / Radius;
                     record.Material = m_Material;
+
+                    UpdateSphereUV(ref record);
+
                     return true;
                 }
 
@@ -58,6 +62,9 @@ namespace MonoGameRayTracer.Primitives
                     record.P = ray.PointAtParameter(record.T);
                     record.Normal = (record.P - m_Center) / Radius;
                     record.Material = m_Material;
+
+                    UpdateSphereUV(ref record);
+
                     return true;
                 }
             }
@@ -72,13 +79,13 @@ namespace MonoGameRayTracer.Primitives
             return true;
         }
 
-        public override void GetUV(ref HitRecord record, ref float u, ref float v)
+        private void UpdateSphereUV(ref HitRecord record)
         {
             var p = (record.P - m_Center) / m_Radius;
             var phi = Mathf.Atan2(p.Z, p.X);
             var theta = Mathf.Asin(p.Y);
-            u = 1.0f - (phi + MathHelper.Pi) / (2.0f * MathHelper.Pi);
-            v = (theta + MathHelper.PiOver2) / MathHelper.Pi;
+            record.U = 1.0f - (phi + MathHelper.Pi) / (2.0f * MathHelper.Pi);
+            record.V = (theta + MathHelper.Pi / 2.0f) / MathHelper.Pi;
         }
     }
 }

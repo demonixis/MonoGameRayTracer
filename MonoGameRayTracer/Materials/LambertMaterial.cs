@@ -32,12 +32,7 @@ namespace MonoGameRayTracer.Materials
             scattered = new Ray(record.P, target - record.P);
 
             if (m_Texture != null)
-            {
-                var u = 0.0f;
-                var v = 0.0f;
-                Hitable.GetUV(ref record, ref u, ref v);
-                attenuation = m_Texture.Tex2D(u, v, ref record.P);
-            }
+                attenuation = m_Texture.Tex2D(record.U, record.V, ref record.P);
             else
                 attenuation = m_Albedo;
 
