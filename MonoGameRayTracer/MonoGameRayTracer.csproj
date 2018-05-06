@@ -75,6 +75,7 @@
     <Compile Include="Materials\Material.cs" />
     <Compile Include="Materials\MetalMaterial.cs" />
     <Compile Include="Misc\QuadRenderer.cs" />
+    <Compile Include="Primitives\Quad.cs" />
     <Compile Include="RayTracer.cs" />
     <Compile Include="SceneFactory.cs" />
     <Compile Include="Textures\CheckerTexture.cs" />

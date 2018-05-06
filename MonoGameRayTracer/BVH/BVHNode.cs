@@ -6,9 +6,8 @@ namespace MonoGameRayTracer.DataStructure
     {
         private Hitable m_Left;
         private Hitable m_Right;
-        private AABB m_BoundingBox;
 
-        public BVHNode(List<Hitable> scene, int n, float t0, float t1)
+        public BVHNode(List<Hitable> scene, int n)
         {
             var axis = (int)(Random.Value * 3.0f);
 
@@ -28,25 +27,25 @@ namespace MonoGameRayTracer.DataStructure
             }
             else
             {
-                m_Left = new BVHNode(scene, n / 2, t0, t1);
+                m_Left = new BVHNode(scene, n / 2);
 
                 var list = new List<Hitable>();
                 for (var i = n / 2; i < scene.Count; i++)
                     list.Add(scene[i]);
 
-                m_Right = new BVHNode(list, n - n / 2, t0, t1);
+                m_Right = new BVHNode(list, n - n / 2);
             }
 
             var left = new AABB();
             var right = new AABB();
 
-            if (!m_Left.BoundingBox(0, 0, ref left) || !m_Right.BoundingBox(0, 0, ref right))
+            if (!m_Left.BoundingBox(ref left) || !m_Right.BoundingBox(ref right))
                 throw new System.Exception("No bounding box in bvh_node constructor");
 
             m_BoundingBox = AABB.SurroundingBox(ref left, ref right);
         }
 
-        public override bool BoundingBox(float t0, float t1, ref AABB box)
+        public override bool BoundingBox(ref AABB box)
         {
             box = m_BoundingBox;
             return true;
@@ -91,7 +90,7 @@ namespace MonoGameRayTracer.DataStructure
             var left = new AABB();
             var right = new AABB();
 
-            if (!a.BoundingBox(0, 0, ref left) || !b.BoundingBox(0, 0, ref right))
+            if (!a.BoundingBox(ref left) || !b.BoundingBox(ref right))
                 throw new System.Exception("No bounding box in bvh_node constructor");
 
             if (left.Min.X - right.Min.X < 0.0f)
@@ -105,7 +104,7 @@ namespace MonoGameRayTracer.DataStructure
             AABB left = new AABB();
             AABB right = new AABB();
 
-            if (!a.BoundingBox(0, 0, ref left) || !b.BoundingBox(0, 0, ref right))
+            if (!a.BoundingBox(ref left) || !b.BoundingBox(ref right))
                 throw new System.Exception("No bounding box in bvh_node constructor");
 
             if (left.Min.Y - right.Min.Y < 0.0f)
@@ -119,7 +118,7 @@ namespace MonoGameRayTracer.DataStructure
             AABB left = new AABB();
             AABB right = new AABB();
 
-            if (!a.BoundingBox(0, 0, ref left) || !b.BoundingBox(0, 0, ref right))
+            if (!a.BoundingBox(ref left) || !b.BoundingBox(ref right))
                 throw new System.Exception("No bounding box in bvh_node constructor");
 
             if (left.Min.Z - right.Min.Z < 0.0f)

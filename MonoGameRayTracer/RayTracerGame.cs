@@ -60,8 +60,9 @@ namespace MonoGameRayTracer
             var aspect = (float)m_GraphicsDeviceManager.PreferredBackBufferWidth / (float)m_GraphicsDeviceManager.PreferredBackBufferHeight;
 
             var scene = SceneFactory.MakeSphereScene(Content, sceneComplexity);
+            //var scene = SceneFactory.MakeCornellBoxScene();
 
-            m_Camera = new Camera(new Vector3(0, 0.5f, 4.5f), new Vector3(-0.22f, 0.15f, 0.0f), Vector3.Up, 75.0f, aspect);
+            m_Camera = new Camera(new Vector3(278, 278, -800), new Vector3(-0.22f, 0.15f, 0.0f), Vector3.Up, 75.0f, aspect);
             m_World = new HitableList(scene);
 
             m_Raytracer = new RayTracer(this, scale);

@@ -36,13 +36,13 @@ namespace MonoGameRayTracer
             return hitAnything;
         }
 
-        public override bool BoundingBox(float t0, float t1, ref AABB box)
+        public override bool BoundingBox(ref AABB box)
         {
             if (m_List.Count < 1)
                 return false;
 
             AABB tmp = new AABB();
-            var first = m_List[0].BoundingBox(t0, t1, ref tmp);
+            var first = m_List[0].BoundingBox(ref tmp);
 
             if (!first)
                 return false;
@@ -51,7 +51,7 @@ namespace MonoGameRayTracer
 
             for (var i = 0; i < m_List.Count; i++)
             {
-                if (m_List[0].BoundingBox(t0, t1, ref tmp))
+                if (m_List[0].BoundingBox(ref tmp))
                     box = AABB.SurroundingBox(ref box, ref tmp);
             }
 

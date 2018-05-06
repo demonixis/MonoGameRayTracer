@@ -16,12 +16,8 @@ namespace MonoGameRayTracer.Primitives
         public float Radius => m_Radius;
 
         public Sphere(Vector3 center, float radius, Material material)
+            : this(ref center, ref radius, material)
         {
-            m_Center = center;
-            m_Radius = radius;
-            m_Material = material;
-            m_Material.Hitable = this;
-            m_Radius2 = radius * radius;
         }
 
         public Sphere(ref Vector3 center, ref float radius, Material material)
@@ -31,6 +27,9 @@ namespace MonoGameRayTracer.Primitives
             m_Material = material;
             m_Material.Hitable = this;
             m_Radius2 = radius * radius;
+
+            var bounds = new Vector3(m_Radius);
+            m_BoundingBox = new AABB(m_Center - bounds, m_Center + bounds);
         }
 
         public override bool Hit(ref Ray ray, float min, float max, ref HitRecord record)
@@ -76,10 +75,9 @@ namespace MonoGameRayTracer.Primitives
             return false;
         }
 
-        public override bool BoundingBox(float t0, float t1, ref AABB box)
+        public override bool BoundingBox(ref AABB box)
         {
-            var bounds = new Vector3(m_Radius);
-            box = new AABB(m_Center - bounds, m_Center + bounds);
+            box = m_BoundingBox;
             return true;
         }
 

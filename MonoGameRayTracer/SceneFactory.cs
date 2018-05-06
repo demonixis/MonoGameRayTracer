@@ -44,5 +44,24 @@ namespace MonoGameRayTracer
 
             return list;
         }
+
+        public static List<Hitable> MakeCornellBoxScene()
+        {
+            var list = new List<Hitable>();
+
+            var red = new LambertMaterial(new Vector3(0.65f, 0.05f, 0.05f));
+            var white = new LambertMaterial(new Vector3(0.73f, 0.73f, 0.73f));
+            var green = new LambertMaterial(new Vector3(0.12f, 0.45f, 0.15f));
+            var light = new DiffuseLightMaterial(new ConstantTexture(new Vector3(15, 15, 15)));
+
+            list.Add(new Quad(Quad.Axis.YZ, true, 0, 555, 0, 555, 555, green));
+            list.Add(new Quad(Quad.Axis.YZ, false, 0, 555, 0, 555, 0, red));
+            list.Add(new Quad(Quad.Axis.XZ, false, 213, 343, 227, 332, 554, light));
+            list.Add(new Quad(Quad.Axis.XZ, true, 0, 555, 0, 555, 555, white));
+            list.Add(new Quad(Quad.Axis.XZ, false, 0, 555, 0, 555, 0, white));
+            list.Add(new Quad(Quad.Axis.XY, true, 0, 555, 0, 555, 555, white));
+
+            return list;
+        }
     }
 }

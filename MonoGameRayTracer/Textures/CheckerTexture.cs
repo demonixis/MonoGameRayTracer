@@ -29,16 +29,5 @@ namespace MonoGameRayTracer.Textures
 
             return m_EvenTexture.Tex2D(ref u, ref v, ref vector);
         }
-
-        public override void Tex2D(ref HitRecord record, ref Vector3 result)
-        {
-            var vector = record.P;
-            var sines = Mathf.Sin(10.0f * vector.X) * Mathf.Sin(10.0f * vector.Y) * Mathf.Sin(10.0f * vector.Z);
-
-            if (sines < 0)
-                result = m_OddTexture.Tex2D(ref record.U, ref record.V, ref vector);
-
-            result = m_EvenTexture.Tex2D(ref record.U, ref record.V, ref vector);
-        }
     }
 }
