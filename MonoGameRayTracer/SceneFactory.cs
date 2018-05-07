@@ -14,7 +14,7 @@ namespace MonoGameRayTracer
         {
             var list = new List<Hitable>();
             list.Add(new Sphere(new Vector3(0, -1000, 0), 1000, new LambertMaterial(new CheckerTexture())));
-
+            
             var temp = new Vector3(4, 0.2f, 0);
 
             for (var a = -sceneComplexity; a < sceneComplexity; a++)
@@ -31,16 +31,20 @@ namespace MonoGameRayTracer
                         else if (chooseMat < 0.95f)
                             list.Add(new Sphere(center, 0.2f, new MetalMaterial(0.5f * (1 + Random.Value), 0.5f * (1 + Random.Value), 0.5f * (1 + Random.Value), 0.5f * Random.Value)));
                         else
-                            list.Add(new Sphere(center, 0.2f, new DieletricMaterial(1.5f)));
+                            list.Add(new Sphere(center, 0.2f, new MetalMaterial(0.5f * (1 + Random.Value), 0.5f * (1 + Random.Value), 0.5f * (1 + Random.Value), 0.5f * Random.Value)));
                     }
                 }
             }
 
             var earthTexture = content.Load<Texture2D>("earth");
 
-            list.Add(new Sphere(new Vector3(0, 1, 0), 1, new LambertMaterial(new ImageTexture(earthTexture))));
+            list.Add(new Sphere(new Vector3(0, 1, -2), 1, new LambertMaterial(new ImageTexture(earthTexture))));
             list.Add(new Sphere(new Vector3(-4, 1, 0), 1, new LambertMaterial(new NoiseTexture())));
             list.Add(new Sphere(new Vector3(4, 1, 0), 1, new MetalMaterial(0.7f, 0.6f, 0.5f, 0.0f)));
+            //list.Add(new Cube(new Vector3(0, 0, 1), new Vector3(1, 1, 2), new LambertMaterial(new NoiseTexture())));
+            
+            //var mesh = new Mesh(content.Load<Model>("Ship"), new MetalMaterial(0.7f, 0.6f, 0.5f, 0.0f));
+            //list.Add(mesh);
 
             return list;
         }

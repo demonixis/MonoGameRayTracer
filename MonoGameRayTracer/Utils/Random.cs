@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using System;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -7,16 +6,16 @@ namespace MonoGameRayTracer
 {
     public static class Random
     {
-        private static Dictionary<Thread, System.Random> m_RandomDico = new Dictionary<Thread, System.Random>();
+        private static Dictionary<int, System.Random> m_RandomDico = new Dictionary<int, System.Random>();
 
         public static System.Random SafeRandom
         {
             get
             {
-                var current = Thread.CurrentThread;
+                var current = Thread.CurrentThread.ManagedThreadId;
 
                 if (!m_RandomDico.ContainsKey(current))
-                    m_RandomDico.Add(current, new System.Random(DateTime.Now.Millisecond));
+                    m_RandomDico.Add(current, new System.Random());
 
                 return m_RandomDico[current];
             }

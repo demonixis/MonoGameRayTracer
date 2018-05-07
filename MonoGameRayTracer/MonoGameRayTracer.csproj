@@ -70,13 +70,12 @@
     <Compile Include="BVH\BVHNode.cs" />
     <Compile Include="Camera.cs" />
     <Compile Include="Materials\DiffuseLightMaterial.cs" />
-    <Compile Include="Misc\GPURaytracer.cs" />
     <Compile Include="Materials\DieletricMaterial.cs" />
     <Compile Include="Materials\LambertMaterial.cs" />
     <Compile Include="Materials\Material.cs" />
     <Compile Include="Materials\MetalMaterial.cs" />
-    <Compile Include="Misc\QuadRenderer.cs" />
     <Compile Include="Primitives\Cube.cs" />
+    <Compile Include="Primitives\Mesh.cs" />
     <Compile Include="Primitives\Quad.cs" />
     <Compile Include="RayTracer.cs" />
     <Compile Include="SceneFactory.cs" />

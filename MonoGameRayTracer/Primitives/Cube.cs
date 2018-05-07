@@ -9,6 +9,8 @@ namespace MonoGameRayTracer.Primitives
     {
         private Vector3 m_Min;
         private Vector3 m_Max;
+        private Vector3 m_Center;
+        private float m_Radius;
 
         public Cube(Vector3 min, Vector3 max, Material material)
         {
@@ -16,6 +18,11 @@ namespace MonoGameRayTracer.Primitives
             m_Max = max;
             m_Material = material;
             m_BoundingBox = new AABB(min, max);
+
+            var sphere = BoundingSphere.CreateFromBoundingBox(new BoundingBox(min, max));
+
+            m_Center = sphere.Center;
+            m_Radius = sphere.Radius;
         }
 
         public override bool BoundingBox(ref AABB box)
@@ -26,63 +33,40 @@ namespace MonoGameRayTracer.Primitives
 
         public override bool Hit(ref Ray ray, float min, float max, ref HitRecord record)
         {
-            var origin = ray.Origin;
-            var direction = ray.Direction;
+            var rayDirection = ray.Direction;
+            var rayOrigin = ray.Origin;
 
-            var tmin = (m_Min.X - origin.X) / direction.X;
-            var tmax = (m_Max.X - origin.X) / direction.X;
+            var direction = AABB.VectorToArray(ref rayDirection);
+            var origin = AABB.VectorToArray(ref rayOrigin);
+            var vMin = AABB.VectorToArray(ref m_Min);
+            var vMax = AABB.VectorToArray(ref m_Max);
 
-            if (tmin > tmax)
+            for (var a = 0; a < 3; a++)
             {
-                var tmp = tmin;
-                tmin = tmax;
-                tmax = tmp;
+                var invD = 1.0f / direction[a];
+                var t0 = (vMin[a] - origin[a]) * invD;
+                var t1 = (vMax[a] - origin[a]) * invD;
+
+                if (invD < 0.0f)
+                {
+                    var tmp = t0;
+                    t0 = t1;
+                    t1 = tmp;
+                }
+
+                min = t0 > min ? t0 : min;
+                max = t1 < max ? t1 : max;
+
+                if (max <= min)
+                    return false;
             }
 
-            var tymin = (m_Min.Y - origin.Y) / direction.Y;
-            var tymax = (m_Max.Y - origin.Y) / direction.Y;
-
-            if (tymin > tymax)
-            {
-                var tmp = tmin;
-                tmin = tmax;
-                tmax = tmp;
-            }
-
-            if ((tmin > tymax) || (tymin > tmax))
-                return false;
-
-            if (tymin > tmin)
-                tmin = tymin;
-
-            if (tymax < tmax)
-                tmax = tymax;
-
-            float tzmin = (m_Min.Z - origin.Z) / direction.Z;
-            float tzmax = (m_Max.Z - origin.Z) / direction.Z;
-
-            if (tzmin > tzmax)
-            {
-                var tmp = tzmin;
-                tzmin = tzmax;
-                tzmax = tmp;
-            }
-
-            if ((tmin > tzmax) || (tzmin > tmax))
-                return false;
-
-            if (tzmin > tmin)
-                tmin = tzmin;
-
-            if (tzmax < tmax)
-                tmax = tzmax;
-
-            var center = m_Max - m_Min;
-
-            record.T = Vector3.Distance(origin, center);
+            record.T = Vector3.Distance(rayOrigin, m_Center);
             record.P = ray.PointAtParameter(record.T);
-            record.Normal = (record.P - center);
+            record.Normal = (record.P - m_Center);
             record.Material = m_Material;
+
+            return true;
         }
     }
 }

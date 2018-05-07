@@ -19,10 +19,13 @@ namespace MonoGameRayTracer.DataStructure
 
         public bool Hit(ref Ray ray, float min, float max)
         {
-            var direction = VectorToArray(ray.Direction);
-            var origin = VectorToArray(ray.Origin);
-            var vMin = VectorToArray(m_Minimum);
-            var vMax = VectorToArray(m_Maximum);
+            var rayDirection = ray.Direction;
+            var rayOrigin = ray.Origin;
+
+            var direction = VectorToArray(ref rayDirection);
+            var origin = VectorToArray(ref rayOrigin);
+            var vMin = VectorToArray(ref m_Minimum);
+            var vMax = VectorToArray(ref m_Maximum);
 
             for (var a = 0; a < 3; a++)
             {
@@ -47,17 +50,17 @@ namespace MonoGameRayTracer.DataStructure
             return true;
         }
 
-        private float[] VectorToArray(Vector3 vector) => new[] { vector.X, vector.Y, vector.Z };
+        public static float[] VectorToArray(ref Vector3 vector) => new[] { vector.X, vector.Y, vector.Z };
 
         public static AABB SurroundingBox(ref AABB box0, ref AABB box1)
         {
-            Vector3 small = new Vector3(
+            var small = new Vector3(
                 Math.Min(box0.Min.X, box1.Min.X),
                 Math.Min(box0.Min.Y, box1.Min.Y),
                 Math.Min(box0.Min.Z, box1.Min.Z)
             );
 
-            Vector3 big = new Vector3(
+            var big = new Vector3(
                 Math.Min(box0.Max.X, box1.Max.X),
                 Math.Min(box0.Max.Y, box1.Max.Y),
                 Math.Min(box0.Max.Z, box1.Max.Z)

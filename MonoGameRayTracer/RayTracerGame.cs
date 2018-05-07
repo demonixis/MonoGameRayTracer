@@ -33,9 +33,9 @@ namespace MonoGameRayTracer
         {
             var width = 640;
             var height = 480;
-            var scale = 0.5f;
+            var scale = 1f;
             var rayStep = 1;
-            var sceneComplexity = 1;
+            var sceneComplexity = 5;
 
             var config = new ConfigParser("config.ini");
             config.GetBool("showUI", ref m_ShowUI);
@@ -63,6 +63,7 @@ namespace MonoGameRayTracer
             //var scene = SceneFactory.MakeCornellBoxScene();
 
             m_Camera = new Camera(new Vector3(0, 0.5f, 5), new Vector3(-0.22f, 0.15f, 0.0f), Vector3.Up, 75.0f, aspect);
+            //m_Camera = new Camera(new Vector3(-2.0f, 0.43f, 0.23f), new Vector3(-1.12f, -1.4f, 0.0f), Vector3.Up, 75.0f, aspect);
             m_World = new HitableList(scene);
 
             m_Raytracer = new RayTracer(this, scale);

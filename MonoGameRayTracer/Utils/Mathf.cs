@@ -58,6 +58,9 @@ namespace MonoGameRayTracer.Utils
         public static float Floor(float value) => (float)Math.Floor(value);
         public static float Atan2(float a, float b) => (float)Math.Atan2(a, b);
         public static float Asin(float value) => (float)Math.Asin(value);
+        public static float Abs(float value) => Math.Abs(value);
+
+        public const float Epsilon = (float)Double.Epsilon;
 
         public static float Clamp(float value, float min, float max)
         {
