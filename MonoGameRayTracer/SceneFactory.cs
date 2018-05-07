@@ -42,9 +42,12 @@ namespace MonoGameRayTracer
             list.Add(new Sphere(new Vector3(-4, 1, 0), 1, new LambertMaterial(new NoiseTexture())));
             list.Add(new Sphere(new Vector3(4, 1, 0), 1, new MetalMaterial(0.7f, 0.6f, 0.5f, 0.0f)));
             //list.Add(new Cube(new Vector3(0, 0, 1), new Vector3(1, 1, 2), new LambertMaterial(new NoiseTexture())));
-            
+
             //var mesh = new Mesh(content.Load<Model>("Ship"), new MetalMaterial(0.7f, 0.6f, 0.5f, 0.0f));
             //list.Add(mesh);
+
+            //var skin_adventurer = content.Load<Texture2D>("skin_adventurer");
+            //list.Add(new Mesh(content.Load<Model>("basicCharacter"), new LambertMaterial(new ImageTexture(skin_adventurer)), 0.1f));
 
             return list;
         }

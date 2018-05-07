@@ -34,21 +34,17 @@ namespace MonoGameRayTracer.Primitives
 
         private List<Triangle> m_Triangles;
 
-        public Mesh(Model model, Material material)
+        public Mesh(Model model, Material material, float scale = 0.001f)
         {
             m_Material = material;
 
             var vertices = new List<Vector3>();
             var indices = new List<TriangleIndice>();
-            var transform = Matrix.CreateScale(0.001f);
+            var transform = Matrix.CreateScale(scale);
 
             foreach (var m in model.Meshes)
-            {
                 foreach (var part in m.MeshParts)
-                {
                     ExtractModelMeshPartData(part, ref transform, ref vertices, ref indices);
-                }
-            }
 
             m_Triangles = new List<Triangle>();
 
@@ -77,7 +73,7 @@ namespace MonoGameRayTracer.Primitives
             for (var i = 0; i < m_Triangles.Count; i++)
             {
                 triangle = m_Triangles[i];
-                var hit = Hit(ref ray, ref triangle.V0, ref triangle.V1, ref triangle.V2, ref record, false);
+                var hit = Hit(ref ray, ref triangle.V0, ref triangle.V1, ref triangle.V2, ref record, true);
                 if (hit)
                 {
                     record.Material = m_Material;

@@ -7,8 +7,11 @@ namespace MonoGameRayTracer.DataStructure
         private Hitable m_Left;
         private Hitable m_Right;
 
-        public BVHNode(List<Hitable> scene, int n)
+        public BVHNode(List<Hitable> scene, int n = -1)
         {
+            if (n == -1)
+                n = scene.Count;
+
             var axis = (int)(Random.Value * 3.0f);
 
             if (axis == 0)
