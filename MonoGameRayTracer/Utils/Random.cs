@@ -8,7 +8,6 @@ namespace MonoGameRayTracer
     public static class Random
     {
         private static Dictionary<Thread, System.Random> m_RandomDico = new Dictionary<Thread, System.Random>();
-        private static System.Random m_random = new Pcg.PcgRandom(DateTime.Now.Millisecond);
 
         public static System.Random SafeRandom
         {
