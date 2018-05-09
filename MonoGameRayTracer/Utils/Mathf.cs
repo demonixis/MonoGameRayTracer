@@ -51,6 +51,13 @@ namespace MonoGameRayTracer.Utils
             return r0 + (1.0f - r0) * (float)Math.Pow((1.0f - cosine), 5.0f);
         }
 
+        public static void Sqrt(ref Vector3 vector)
+        {
+            vector.X = Sqrt(vector.X);
+            vector.Y = Sqrt(vector.Y);
+            vector.Z = Sqrt(vector.Z);
+        }
+
         public static float Tan(float value) => (float)Math.Tan(value);
         public static float Sqrt(float value) => (float)Math.Sqrt(value);
         public static float Sin(float value) => (float)Math.Sin(value);

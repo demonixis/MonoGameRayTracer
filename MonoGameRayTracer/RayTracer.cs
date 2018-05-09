@@ -274,19 +274,18 @@ namespace MonoGameRayTracer
         private void UpdatePixel(ref int i, ref int j, Camera camera, Hitable world)
         {
             var color = Vector3.Zero;
+            var ray = new Ray();
 
             for (var s = 0; s < m_Step; s++)
             {
                 var u = (float)(i + Random.Value) / m_RenderWidth;
                 var v = (float)(j + Random.Value) / m_RenderHeight;
-                var ray = camera.GetRay(ref u, ref v);
+                camera.GetRay(ref ray, ref u, ref v);
                 color += GetColor(ref ray, world, 0);
             }
 
             color /= (float)m_Step;
-            color.X = Mathf.Sqrt(color.X);
-            color.Y = Mathf.Sqrt(color.Y);
-            color.Z = Mathf.Sqrt(color.Z);
+            Mathf.Sqrt(ref color);
 
             m_BackBuffer[i + j * m_RenderWidth] = new Color(color.X, color.Y, color.Z);
         }
