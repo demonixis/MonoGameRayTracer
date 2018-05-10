@@ -44,14 +44,14 @@ namespace MonoGameRayTracer.Materials
             }
             else
             {
-                scattered = new Ray(record.P, refracted);
+                scattered.Set(ref record.P, ref refracted);
                 reflectProbe = 1.0f;
             }
 
             if (Random.Value < reflectProbe)
-                scattered = new Ray(record.P, reflected);
+                scattered.Set(ref record.P, ref reflected);
             else
-                scattered = new Ray(record.P, refracted);
+                scattered.Set(ref record.P, ref refracted);
 
             return true;
         }

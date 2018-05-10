@@ -24,7 +24,8 @@ namespace MonoGameRayTracer.Materials
         public override bool Scatter(ref Ray ray, ref HitRecord record, ref Vector3 attenuation, ref Ray scattered)
         {
             var reflected = Vector3.Reflect(Mathf.UnitVector(ray.Direction), record.Normal);
-            scattered = new Ray(record.P, reflected + m_Fuzz * Mathf.RandomInUnitySphere());
+            var direction = reflected + m_Fuzz * Mathf.RandomInUnitySphere();
+            scattered.Set(ref record.P, ref direction);
             attenuation = m_Albedo;
             return Vector3.Dot(scattered.Direction, record.Normal) > 0;
         }

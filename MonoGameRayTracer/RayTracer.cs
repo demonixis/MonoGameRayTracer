@@ -313,12 +313,13 @@ namespace MonoGameRayTracer
             var color = Vector3.Zero;
             int x = i + subRect.Rect.X;
             int y = j + subRect.Rect.Y;
+            Ray ray = new Ray();
 
             for (var s = 0; s < m_Step; s++)
             {
                 var u = (float)(x + Random.Value) / m_RenderWidth;
                 var v = (float)(y + Random.Value) / m_RenderHeight;
-                var ray = camera.GetRay(ref u, ref v);
+                camera.GetRay(ref ray, ref u, ref v);
                 color += GetColor(ref ray, world, 0);
             }
 
