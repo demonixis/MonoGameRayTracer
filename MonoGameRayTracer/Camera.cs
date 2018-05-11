@@ -68,7 +68,7 @@ namespace MonoGameRayTracer
 
         //public Ray GetRay(ref float u, ref float v) => new Ray(m_Origin, m_LowerLeftCorner + u * m_Horizontal + v * m_Vertical - m_Origin);
 
-        public void GetRay(ref Ray ray, ref float u, ref float v)
+        public void GetRay(ref Ray ray, float u, float v)
         {
             var direction = m_LowerLeftCorner + u * m_Horizontal + v * m_Vertical - m_Origin;
             ray.Set(ref m_Origin, ref direction);

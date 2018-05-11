@@ -2,7 +2,6 @@
 using MonoGameRayTracer.DataStructure;
 using MonoGameRayTracer.Materials;
 using MonoGameRayTracer.Utils;
-using System;
 
 namespace MonoGameRayTracer.Primitives
 {

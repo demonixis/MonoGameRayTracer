@@ -33,7 +33,7 @@ namespace MonoGameRayTracer
         {
             var width = 640;
             var height = 480;
-            var scale = 0.5f;
+            var scale = 1f;
             var rayStep = 1;
             var sceneComplexity = 1;
 
