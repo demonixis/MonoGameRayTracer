@@ -21,7 +21,7 @@ namespace MonoGameRayTracer.Utils
         public static Vector3 UnitVector(ref Vector3 vector) => vector / vector.Length();
         public static Vector3 UnitVector(Vector3 vector) => vector / vector.Length();
 
-        public static void UnityVector(ref Vector3 vector, ref Vector3 result) => result = vector / vector.Length();
+        public static void UnitVector(ref Vector3 vector, ref Vector3 result) => result = vector / vector.Length();
 
         public static void MakeUnitVector(ref Vector3 vector)
         {

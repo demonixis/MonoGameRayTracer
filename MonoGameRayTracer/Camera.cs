@@ -55,18 +55,12 @@ namespace MonoGameRayTracer
 
             var w = Mathf.UnitVector(m_Origin - m_LookAt);
             var u = Mathf.UnitVector(Vector3.Cross(m_UpVector, w));
-            var v = Vector3.Cross(w, u);
-
-            m_LowerLeftCorner.X = -halfWidth;
-            m_LowerLeftCorner.Y = -halfHeight;
-            m_LowerLeftCorner.Z = -1.0f;
+            var v = -Vector3.Cross(w, u);
 
             m_LowerLeftCorner = m_Origin - halfWidth * u - halfHeight * v - w;
             m_Horizontal = 2.0f * halfWidth * u;
             m_Vertical = 2.0f * halfHeight * v;
         }
-
-        //public Ray GetRay(ref float u, ref float v) => new Ray(m_Origin, m_LowerLeftCorner + u * m_Horizontal + v * m_Vertical - m_Origin);
 
         public void GetRay(ref Ray ray, float u, float v)
         {

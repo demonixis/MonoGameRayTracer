@@ -10,7 +10,6 @@ namespace MonoGameRayTracer
     {
         private GraphicsDeviceManager m_GraphicsDeviceManager;
         private SpriteBatch m_SpriteBatch;
-        private Rectangle m_FrontbufferRect;
         private Camera m_Camera;
         private HitableList m_World;
         private SpriteFont m_SpriteFont;
@@ -35,7 +34,7 @@ namespace MonoGameRayTracer
             var height = 480;
             var scale = 1f;
             var rayStep = 1;
-            var sceneComplexity = 1;
+            var sceneComplexity = 2;
 
             var config = new ConfigParser("config.ini");
             config.GetBool("showUI", ref m_ShowUI);
@@ -50,8 +49,6 @@ namespace MonoGameRayTracer
             m_GraphicsDeviceManager.PreferredBackBufferHeight = height;
             m_GraphicsDeviceManager.GraphicsProfile = GraphicsProfile.HiDef;
             m_GraphicsDeviceManager.ApplyChanges();
-
-            m_FrontbufferRect = new Rectangle(0, 0, m_GraphicsDeviceManager.PreferredBackBufferWidth, m_GraphicsDeviceManager.PreferredBackBufferHeight);
 
             m_SpriteBatch = new SpriteBatch(GraphicsDevice);
             m_SpriteFont = Content.Load<SpriteFont>("Default");
@@ -72,7 +69,7 @@ namespace MonoGameRayTracer
             if (!m_Realtime)
                 m_Raytracer.Render(m_Camera, m_World);
             else
-                m_Raytracer.StartMTRenderLoop(m_Camera, m_World);
+                m_Raytracer.Start(m_Camera, m_World);
         }
 
         protected override void Update(GameTime gameTime)
@@ -103,9 +100,9 @@ namespace MonoGameRayTracer
             {
                 m_Realtime = !m_Realtime;
                 if (m_Realtime)
-                    m_Raytracer.StartMTRenderLoop(m_Camera, m_World);
+                    m_Raytracer.Start(m_Camera, m_World);
                 else
-                    m_Raytracer.StopRenderLoop();
+                    m_Raytracer.Stop();
             }
 
             if (m_Input.GetKeyDown(Keys.F12) && !m_Realtime)
@@ -121,7 +118,7 @@ namespace MonoGameRayTracer
                 if (m_Raytracer.SetupBuffers(m_Raytracer.Scale + 0.05f * sign))
                 {
                     if (m_Realtime)
-                        m_Raytracer.StartMTRenderLoop(m_Camera, m_World);
+                        m_Raytracer.Start(m_Camera, m_World);
                     else
                         m_Raytracer.Render(m_Camera, m_World);
                 }
@@ -132,7 +129,7 @@ namespace MonoGameRayTracer
                 var pp = GraphicsDevice.PresentationParameters;
 
                 using (var stream = File.OpenWrite("screenshot.png"))
-                    m_Raytracer.Texture.SaveAsPng(stream, pp.BackBufferWidth, pp.BackBufferHeight);
+                    m_Raytracer.BackBufferTexture.SaveAsPng(stream, pp.BackBufferWidth, pp.BackBufferHeight);
             }
 
             // ---
