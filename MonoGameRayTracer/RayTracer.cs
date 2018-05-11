@@ -12,6 +12,7 @@ namespace MonoGameRayTracer
     {
         public Rectangle Rect { get; private set; }
         public Color[] Buffer { get; private set; }
+        public bool Done { get; set; }
 
         public SubRect(int x, int y, int width, int height, int slice)
         {
@@ -62,7 +63,7 @@ namespace MonoGameRayTracer
         public Texture2D Texture => m_backBufferTexture;
 
         public RayTracer(Game game, float scale)
-            : base (game)
+            : base(game)
         {
             m_Stopwatch = new Stopwatch();
             m_Threads = new List<Thread>();
@@ -90,9 +91,23 @@ namespace MonoGameRayTracer
         {
             base.Draw(gameTime);
 
+            var count = 0;
+
+            foreach (var rect in m_subRects)
+                if (rect.Done)
+                    count++;
+
+            var isOk = count == m_subRects.Length;
+            if (isOk)
+                m_backBufferTexture.SetData<Color>(m_BackBuffer);
+
             m_SpriteBatch.Begin();
             m_SpriteBatch.Draw(m_backBufferTexture, m_DrawRectangle, null, Color.White, 0, Vector2.Zero, SpriteEffects.FlipVertically, 0);
             m_SpriteBatch.End();
+
+            if (isOk)
+                foreach (var rect in m_subRects)
+                    rect.Done = false;
         }
 
         public bool SetupBuffers(float scale)
@@ -167,10 +182,10 @@ namespace MonoGameRayTracer
             m_ThreadRunning = true;
 
             for (var i = 0; i < m_subRects.Length; i++)
-                StartThreadedRenderLoop(camera, world, m_subRects[i]);
+                StartThreadedRenderLoop(camera, world, i);
         }
 
-        private void StartThreadedRenderLoop(Camera camera, Hitable world, SubRect subRect)
+        private void StartThreadedRenderLoop(Camera camera, Hitable world, int subRect)
         {
             var thread = new Thread(() =>
             {
@@ -186,7 +201,7 @@ namespace MonoGameRayTracer
             thread.Start();
         }
 
-#endregion
+        #endregion
 
         private Vector3 GetColorRecursive(Ray ray, Hitable world, int depth) => GetColorRecursive(ref ray, world, depth);
 
@@ -201,7 +216,7 @@ namespace MonoGameRayTracer
                 if (record.Material != null)
                 {
                     if (depth < m_MaxDepth && record.Material.Scatter(ref ray, ref record, ref attenuation, ref scattered))
-                        return attenuation* GetColor(ref scattered, world, depth + 1);
+                        return attenuation * GetColor(ref scattered, world, depth + 1);
                     else
                         return Vector3.Zero;
                 }
@@ -217,7 +232,7 @@ namespace MonoGameRayTracer
             return (1.0f - t) * Vector3.One + t * new Vector3(0.5f, 0.7f, 1.0f);
         }
 
-       // private Vector3 GetColor(Ray ray, Hitable world, int depth) => GetColor(ref ray, world, depth);
+        // private Vector3 GetColor(Ray ray, Hitable world, int depth) => GetColor(ref ray, world, depth);
 
         private Vector3 GetColor(ref Ray ray, Hitable world, int depth)
         {
@@ -290,16 +305,23 @@ namespace MonoGameRayTracer
             m_BackBuffer[i + j * m_RenderWidth] = new Color(color.X, color.Y, color.Z);
         }
 
-        private void RenderMT(Camera camera, Hitable world, SubRect subRect)
+        private void RenderMT(Camera camera, Hitable world, int subRectIndex)
         {
+            var subRect = m_subRects[subRectIndex];
+
+            while (subRect.Done)
+                Thread.Sleep(10);
+
             if (subRect.Rect.X == 0 && subRect.Rect.Y == 0)
                 m_Stopwatch.Restart();
 
             for (var j = 0; j < subRect.Rect.Height; j++)
                 for (var i = 0; i < subRect.Rect.Width; i++)
-                    UpdatePixelMT(ref i, ref j, camera, world, subRect);
+                    UpdatePixelMT(ref i, ref j, camera, world, subRectIndex);
 
-            m_backBufferTexture.SetData<Color>(0, new Rectangle(subRect.Rect.X, subRect.Rect.Y, subRect.Rect.Width, subRect.Rect.Height), subRect.Buffer, 0, subRect.Buffer.Length);
+            //m_backBufferTexture.SetData<Color>(0, new Rectangle(subRect.Rect.X, subRect.Rect.Y, subRect.Rect.Width, subRect.Rect.Height), subRect.Buffer, 0, subRect.Buffer.Length);
+
+            subRect.Done = true;
 
             if (subRect.Rect.X == 0 && subRect.Rect.Y == 0)
             {
@@ -308,12 +330,13 @@ namespace MonoGameRayTracer
             }
         }
 
-        private void UpdatePixelMT(ref int i, ref int j, Camera camera, Hitable world, SubRect subRect)
+        private void UpdatePixelMT(ref int i, ref int j, Camera camera, Hitable world, int subRectIndex)
         {
+            var subRect = m_subRects[subRectIndex];
             var color = Vector3.Zero;
             int x = i + subRect.Rect.X;
             int y = j + subRect.Rect.Y;
-            Ray ray = new Ray();
+            var ray = new Ray();
 
             for (var s = 0; s < m_Step; s++)
             {
@@ -328,7 +351,9 @@ namespace MonoGameRayTracer
             color.Y = Mathf.Sqrt(color.Y);
             color.Z = Mathf.Sqrt(color.Z);
 
-            subRect.Buffer[i + j * subRect.Rect.Width] = new Color(color.X, color.Y, color.Z);
+            //subRect.Buffer[i + j * subRect.Rect.Width] = new Color(color.X, color.Y, color.Z);
+
+            m_BackBuffer[x + y * m_RenderWidth] = new Color(color.X, color.Y, color.Z);
         }
     }
 }
