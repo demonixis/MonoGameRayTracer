@@ -34,7 +34,7 @@ namespace MonoGameRayTracer
             var height = 480;
             var scale = 1f;
             var rayStep = 1;
-            var sceneComplexity = 2;
+            var sceneComplexity = 3;
 
             var config = new ConfigParser("config.ini");
             config.GetBool("showUI", ref m_ShowUI);
@@ -49,7 +49,7 @@ namespace MonoGameRayTracer
             m_GraphicsDeviceManager.PreferredBackBufferHeight = height;
             m_GraphicsDeviceManager.GraphicsProfile = GraphicsProfile.HiDef;
             m_GraphicsDeviceManager.ApplyChanges();
-
+            
             m_SpriteBatch = new SpriteBatch(GraphicsDevice);
             m_SpriteFont = Content.Load<SpriteFont>("Default");
 

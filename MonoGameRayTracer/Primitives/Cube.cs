@@ -10,7 +10,6 @@ namespace MonoGameRayTracer.Primitives
         private Vector3 m_Min;
         private Vector3 m_Max;
         private Vector3 m_Center;
-        private float m_Radius;
 
         public Cube(Vector3 min, Vector3 max, Material material)
         {
@@ -20,9 +19,7 @@ namespace MonoGameRayTracer.Primitives
             m_BoundingBox = new AABB(min, max);
 
             var sphere = BoundingSphere.CreateFromBoundingBox(new BoundingBox(min, max));
-
             m_Center = sphere.Center;
-            m_Radius = sphere.Radius;
         }
 
         public override bool BoundingBox(ref AABB box)
@@ -61,7 +58,7 @@ namespace MonoGameRayTracer.Primitives
                     return false;
             }
 
-            record.T = Vector3.Distance(rayOrigin, m_Center);
+            record.T = min < 0 ? max : min;
             record.P = ray.PointAtParameter(record.T);
             record.Normal = (record.P - m_Center);
             record.Material = m_Material;

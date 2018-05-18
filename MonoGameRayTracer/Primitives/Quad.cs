@@ -11,6 +11,14 @@ namespace MonoGameRayTracer.Primitives
             XY = 0, XZ, YZ
         }
 
+        public struct RectF
+        {
+            public float X;
+            public float Y;
+            public float Width;
+            public float Height;
+        }
+
         private float m_Start0;
         private float m_Start1;
         private float m_End0;
@@ -18,6 +26,34 @@ namespace MonoGameRayTracer.Primitives
         private float m_K;
         private bool m_InvertNormal;
         private Axis m_Axis;
+
+        public Quad(Axis axis, bool invertNormal, RectF rect, float k, Material material)
+        {
+            m_Axis = axis;
+            m_InvertNormal = invertNormal;
+            m_K = k;
+            m_Start0 = rect.X;
+            m_Start1 = rect.X + rect.Width;
+            m_End0 = rect.Y;
+            m_End1 = rect.Y + rect.Height;
+            m_Material = material;
+
+            var min = new Vector3(m_Start0, m_End0, m_K - 0.0001f);
+            var max = new Vector3(m_Start1, m_End1, m_K + 0.0001f);
+
+            if (axis == Axis.XZ)
+            {
+                min = new Vector3(m_Start0, m_K - 0.0001f, m_End0);
+                max = new Vector3(m_Start1, m_K + 0.0001f, m_End1);
+            }
+            else if (axis == Axis.YZ)
+            {
+                min = new Vector3(m_K - 0.0001f, m_Start0, m_End0);
+                max = new Vector3(m_K + 0.0001f, m_Start1, m_End1);
+            }
+
+            m_BoundingBox = new AABB(min, max);
+        }
 
         public Quad(Axis axis, bool invertNormal, float x0, float x1, float y0, float y1, float k, Material material)
         {

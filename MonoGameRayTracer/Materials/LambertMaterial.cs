@@ -12,6 +12,7 @@ namespace MonoGameRayTracer.Materials
         public LambertMaterial(Texture texture, Texture emissive = null)
         {
             m_Texture = texture;
+            m_TextureEnabled = true;
             m_EmissiveTexture = emissive;
             m_EmissiveEnabled = m_EmissiveTexture != null;
         }

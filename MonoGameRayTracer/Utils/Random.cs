@@ -1,29 +1,33 @@
 ﻿using Microsoft.Xna.Framework;
-using System.Collections.Generic;
-using System.Threading;
 
 namespace MonoGameRayTracer
 {
     public static class Random
     {
-        private static Dictionary<int, System.Random> m_RandomDico = new Dictionary<int, System.Random>();
+        private static uint state = (uint)System.DateTime.Now.Millisecond;
 
-        public static System.Random SafeRandom
+        public static uint XorShift32()
         {
-            get
-            {
-                var current = Thread.CurrentThread.ManagedThreadId;
-
-                if (!m_RandomDico.ContainsKey(current))
-                    m_RandomDico.Add(current, new System.Random());
-
-                return m_RandomDico[current];
-            }
+            var x = state;
+            x ^= x << 13;
+            x ^= x >> 17;
+            x ^= x << 5;
+            state = x;
+            return x;
         }
 
-        public static float Value => (float)SafeRandom.NextDouble();
+        public static float Value => (float)XorShift32() / (float)uint.MaxValue;
+
         public static Vector3 Float3Sqrt => new Vector3(Value, Value, Value);
-        public static Vector3 Float3 => new Vector3(Value * Value, Value * Value, Value * Value);
+
+        public static Vector3 Float3()
+        {
+            var x = Value;
+            var y = Value;
+            var z = Value;
+            return new Vector3(x * x, y * y, z * z);
+        }
+
         public static Color Color => new Color(Value, Value, Value);
     }
 }

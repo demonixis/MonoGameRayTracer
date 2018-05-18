@@ -13,8 +13,8 @@ namespace MonoGameRayTracer
         public static List<Hitable> MakeSphereScene(ContentManager content, int sceneComplexity)
         {
             var list = new List<Hitable>();
-            list.Add(new Sphere(new Vector3(0, -1000, 0), 1000, new LambertMaterial(new CheckerTexture())));
-            
+            list.Add(new Sphere(new Vector3(0, -1000, 0), 1000, new MetalMaterial(new CheckerTexture(), 0.2f)));
+
             var temp = new Vector3(4, 0.2f, 0);
 
             for (var a = -sceneComplexity; a < sceneComplexity; a++)
@@ -37,17 +37,19 @@ namespace MonoGameRayTracer
             }
 
             var earthTexture = content.Load<Texture2D>("earth");
+            var amigaTexture = new CheckerTexture(new ConstantTexture(new Color(0.9f, 0.0f, 0.0f)), new ConstantTexture(new Color(0.9f, 0.9f, 0.9f)));
+            var amigaEmissiveTexture = new CheckerTexture(new ConstantTexture(Color.Red), new ConstantTexture(Color.Black));
 
-            list.Add(new Sphere(new Vector3(0, 1, -2), 1, new LambertMaterial(new ImageTexture(earthTexture))));
-            list.Add(new Sphere(new Vector3(-4, 1, 0), 1, new LambertMaterial(new NoiseTexture())));
-            list.Add(new Sphere(new Vector3(4, 1, 0), 1, new MetalMaterial(0.7f, 0.6f, 0.5f, 0.0f)));
-            //list.Add(new Cube(new Vector3(0, 0, 1), new Vector3(1, 1, 2), new LambertMaterial(new NoiseTexture())));
+            if (sceneComplexity > 0)
+            {
+                list.Add(new Sphere(new Vector3(0, 1, -2), 1, new LambertMaterial(new ImageTexture(earthTexture))));
+                list.Add(new Sphere(new Vector3(-4, 1, 0), 1, new LambertMaterial(amigaTexture, amigaEmissiveTexture)));
+                list.Add(new Sphere(new Vector3(4, 1, 0), 1, new MetalMaterial(0.7f, 0.6f, 0.5f, 0.0f)));
+                list.Add(new Cube(new Vector3(0, 0, 2), new Vector3(1, 1, 3), new LambertMaterial(amigaTexture)));
+            }
 
-            //var mesh = new Mesh(content.Load<Model>("Ship"), new MetalMaterial(0.7f, 0.6f, 0.5f, 0.0f));
-            //list.Add(mesh);
-
-            //var skin_adventurer = content.Load<Texture2D>("skin_adventurer");
-            //list.Add(new Mesh(content.Load<Model>("basicCharacter"), new LambertMaterial(new ImageTexture(skin_adventurer)), 0.1f));
+            /*var skin_adventurer = content.Load<Texture2D>("skin_adventurer");
+            list.Add(new Mesh(content.Load<Model>("basicCharacter"), new MetalMaterial(0, 0, 0, 0), 0.1f));*/
 
             return list;
         }
