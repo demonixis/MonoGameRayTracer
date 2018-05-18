@@ -27,7 +27,7 @@ namespace MonoGameRayTracer
                     if ((center - temp).Length() > 0.9f)
                     {
                         if (chooseMat < 0.8f)
-                            list.Add(new Sphere(center, 0.2f, new LambertMaterial(Random.Vector3Twice)));
+                            list.Add(new Sphere(center, 0.2f, new LambertMaterial(Random.Value, Random.Value, Random.Value)));
                         else if (chooseMat < 0.95f)
                             list.Add(new Sphere(center, 0.2f, new MetalMaterial(0.5f * (1 + Random.Value), 0.5f * (1 + Random.Value), 0.5f * (1 + Random.Value), 0.5f * Random.Value)));
                         else
@@ -56,9 +56,9 @@ namespace MonoGameRayTracer
         {
             var list = new List<Hitable>();
 
-            var red = new LambertMaterial(new Vector3(0.65f, 0.05f, 0.05f));
-            var white = new LambertMaterial(new Vector3(0.73f, 0.73f, 0.73f));
-            var green = new LambertMaterial(new Vector3(0.12f, 0.45f, 0.15f));
+            var red = new LambertMaterial(0.65f, 0.05f, 0.05f);
+            var white = new LambertMaterial(0.73f, 0.73f, 0.73f);
+            var green = new LambertMaterial(0.12f, 0.45f, 0.15f);
             var light = new DiffuseLightMaterial(new ConstantTexture(new Vector3(15, 15, 15)));
 
             list.Add(new Quad(Quad.Axis.YZ, true, 0, 555, 0, 555, 555, green));

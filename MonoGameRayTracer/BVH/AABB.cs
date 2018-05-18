@@ -21,7 +21,6 @@ namespace MonoGameRayTracer.DataStructure
         {
             var rayDirection = ray.Direction;
             var rayOrigin = ray.Origin;
-
             var direction = VectorToArray(ref rayDirection);
             var origin = VectorToArray(ref rayOrigin);
             var vMin = VectorToArray(ref m_Minimum);

@@ -11,7 +11,7 @@ namespace MonoGameRayTracer.Utils
 
             do
             {
-                vector = 2.0f * Random.Vector3 - Vector3.One;
+                vector = 2.0f * Random.Float3Sqrt - Vector3.One;
             }
             while (vector.LengthSquared() > 1.0f);
 

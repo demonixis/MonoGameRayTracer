@@ -1,15 +1,25 @@
 ﻿using Microsoft.Xna.Framework;
+using MonoGameRayTracer.Textures;
 using MonoGameRayTracer.Utils;
 
 namespace MonoGameRayTracer.Materials
 {
     public class DieletricMaterial : Material
     {
-        float m_RefIdx;
+        private float m_RefIdx;
 
-        public DieletricMaterial(float refIdx)
+        public DieletricMaterial(float refIdx, Texture texture = null)
         {
             m_RefIdx = refIdx;
+            m_Albedo = new Vector3(1.0f, 1.0f, 0.0f);
+            m_Texture = texture;
+            m_TextureEnabled = texture != null;
+        }
+
+        public DieletricMaterial(float refIdx, Vector3 albedo)
+        {
+            m_RefIdx = refIdx;
+            m_Albedo = albedo;
         }
 
         public override bool Scatter(ref Ray ray, ref HitRecord record, ref Vector3 attenuation, ref Ray scattered)
@@ -18,11 +28,11 @@ namespace MonoGameRayTracer.Materials
             var outwardNormal = Vector3.Zero;
             var reflected = Vector3.Reflect(rayDirection, record.Normal);
             var niOverNt = 0.0f;
-
-            attenuation = new Vector3(1.0f, 1.0f, 0.0f);
             var refracted = Vector3.Zero;
             var reflectProbe = 0.0f;
             var cosine = 0.0f;
+
+            attenuation = m_TextureEnabled ? m_Texture.Tex2D(ref record.U, ref record.V, ref record.P) : m_Albedo;
 
             if (Vector3.Dot(rayDirection, record.Normal) > 0)
             {

@@ -6,19 +6,14 @@ namespace MonoGameRayTracer.Materials
 {
     public class LambertMaterial : Material
     {
-        private Vector3 m_Albedo;
-        private Texture m_Texture;
+        private Texture m_EmissiveTexture;
+        private bool m_EmissiveEnabled;
 
-        public Vector3 Albedo => m_Albedo;
-
-        public LambertMaterial(Vector3 albedo)
-        {
-            m_Albedo = albedo;
-        }
-
-        public LambertMaterial(Texture texture)
+        public LambertMaterial(Texture texture, Texture emissive = null)
         {
             m_Texture = texture;
+            m_EmissiveTexture = emissive;
+            m_EmissiveEnabled = m_EmissiveTexture != null;
         }
 
         public LambertMaterial(float x, float y, float z)
@@ -31,13 +26,13 @@ namespace MonoGameRayTracer.Materials
             var target = record.P + record.Normal + Mathf.RandomInUnitySphere();
             var direction = target - record.P;
             scattered.Set(ref record.P, ref direction);
-
-            if (m_Texture != null)
-                attenuation = m_Texture.Tex2D(ref record.U, ref record.V, ref record.P);
-            else
-                attenuation = m_Albedo;
-
+            attenuation = m_TextureEnabled ? m_Texture.Tex2D(ref record.U, ref record.V, ref record.P) : m_Albedo;
             return true;
+        }
+
+        public override Vector3 Emitted(ref float u, ref float v, ref Vector3 p)
+        {
+            return m_EmissiveEnabled ? m_EmissiveTexture.Tex2D(ref u, ref v, ref p) : Vector3.Zero;
         }
     }
 }

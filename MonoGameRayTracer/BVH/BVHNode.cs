@@ -104,8 +104,8 @@ namespace MonoGameRayTracer.DataStructure
 
         private int BoxYCompare(Hitable a, Hitable b)
         {
-            AABB left = new AABB();
-            AABB right = new AABB();
+            var left = new AABB();
+            var right = new AABB();
 
             if (!a.BoundingBox(ref left) || !b.BoundingBox(ref right))
                 throw new System.Exception("No bounding box in bvh_node constructor");
@@ -118,8 +118,8 @@ namespace MonoGameRayTracer.DataStructure
 
         private int BoxZCompare(Hitable a, Hitable b)
         {
-            AABB left = new AABB();
-            AABB right = new AABB();
+            var left = new AABB();
+            var right = new AABB();
 
             if (!a.BoundingBox(ref left) || !b.BoundingBox(ref right))
                 throw new System.Exception("No bounding box in bvh_node constructor");
